@@ -42,13 +42,14 @@ if __name__ == "__main__":
             audio_length = float(subprocess.check_output(command, shell=True))
 
             # Create overlapping slices + spectrogram for a single audio file
-            for i in np.arange(0, math.floor(audio_length), 0.5):
-                overlap_start = i / 2.0
+            for i in np.arange(0, math.floor(audio_length) - 0.5, 0.5):
+
+                overlap_start = i
                 overlap_end = overlap_start + 1
 
-                filename = os.path.join(args.output_path, "spec_{0}_{1}.png".format(file, i))
-                command = "sox {0} -n trim {1} {2} spectrogram -x 244 -y 244 -l -r -o {3}".format(abs_path, overlap_start,
+                filename = os.path.join(args.output_path, "{0}_{1}.png".format(file, i))
+                command = "sox {0} -n trim {1} ={2} spectrogram -x 244 -y 244 -l -r -o {3}".format(abs_path, overlap_start,
                                                                                                   overlap_end, filename)
                 subprocess.call(command, shell=True)
 
-        print("Progress {0:.2f}%".format(progress / num_files))
+            print("Progress {0:.2f}%".format(progress / num_files))
