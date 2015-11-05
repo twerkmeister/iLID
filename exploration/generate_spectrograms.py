@@ -58,4 +58,3 @@ if __name__ == "__main__":
             progress_bar.update(progress)
 
     progress_bar.finish()
-   

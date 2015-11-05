@@ -1,0 +1,3 @@
+import spectrogram_extractor
+
+SpectrogramExtractor = spectrogram_extractor.SpectrogramExtractor
