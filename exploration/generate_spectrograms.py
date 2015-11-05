@@ -4,6 +4,7 @@ import argparse
 import math
 import sys
 import numpy as np
+from progressbar import ProgressBar
 
 if __name__ == "__main__":
 
@@ -25,8 +26,9 @@ if __name__ == "__main__":
         sys.exit("Input path is not a directory.")
 
     # Progress counters
-    num_files = float(len(list(os.walk(args.input_path))))
+    num_files = float(sum([len(files) for _, _, files in os.walk(args.input_path)]))
     progress = 0
+    progress_bar = ProgressBar(maxval=num_files).start()
 
     # Iterate over all WAV files in input dir for conversion
     for root, dirs, files in os.walk(args.input_path):
@@ -43,13 +45,17 @@ if __name__ == "__main__":
 
             # Create overlapping slices + spectrogram for a single audio file
             for i in np.arange(0, math.floor(audio_length) - 0.5, 0.5):
-
                 overlap_start = i
                 overlap_end = overlap_start + 1
 
                 filename = os.path.join(args.output_path, "{0}_{1}.png".format(file, i))
-                command = "sox {0} -n trim {1} ={2} spectrogram -x 244 -y 244 -l -r -o {3}".format(abs_path, overlap_start,
-                                                                                                  overlap_end, filename)
+                command = "sox {0} -n trim {1} ={2} spectrogram -x 244 -y 244 -l -r -o {3}".format(abs_path,
+                                                                                                   overlap_start,
+                                                                                                   overlap_end,
+                                                                                                   filename)
                 subprocess.call(command, shell=True)
 
-            print("Progress {0:.2f}%".format(progress / num_files))
+            progress_bar.update(progress)
+
+    progress_bar.finish()
+   
