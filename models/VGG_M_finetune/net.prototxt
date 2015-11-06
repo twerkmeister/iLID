@@ -1,4 +1,4 @@
-name: "VGG_CNN_M"
+name: "VGG_CNN_M_2048"
 layer {
   name: "data"
   type: "Data"
@@ -47,7 +47,7 @@ layer {
    mirror: false
   }
   data_param {
-    source: "/home/mpss2015m_1/DeepAudio/iLID-Data/languages/testingdb"
+    source: "/home/mpss2015m_1/DeepAudio/iLID-Data/languages/testdb"
     batch_size: 4
     backend: LEVELDB
   }
@@ -59,11 +59,11 @@ layer {
   name: "conv1"
   type: "Convolution"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0
+    decay_mult: 0
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -107,11 +107,11 @@ layer {
   name: "conv2"
   type: "Convolution"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0
+    decay_mult: 0
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -156,11 +156,11 @@ layer {
   name: "conv3"
   type: "Convolution"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0
+    decay_mult: 0
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -181,11 +181,11 @@ layer {
   name: "conv4"
   type: "Convolution"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0
+    decay_mult: 0
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -206,11 +206,11 @@ layer {
   name: "conv5"
   type: "Convolution"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0
+    decay_mult: 0
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   convolution_param {
@@ -274,11 +274,11 @@ layer {
   name: "fc7"
   type: "InnerProduct"
   param {
-    lr_mult: 1
-    decay_mult: 1
+    lr_mult: 0
+    decay_mult: 0
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
     decay_mult: 0
   }
   inner_product_param {
@@ -301,10 +301,10 @@ layer {
   }
 }
 layer {
-  name: "fc8"
+  name: "fc8_new"
   type: "InnerProduct"
   bottom: "fc7"
-  top: "fc8"
+  top: "fc8_new"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -314,13 +314,13 @@ layer {
     decay_mult: 0
   }
   inner_product_param {
-    num_output: 101
+    num_output: 2
   }
 }
 layer {
   name: "accuracy"
   type: "Accuracy"
-  bottom: "fc8"
+  bottom: "fc8_new"
   bottom: "label"
   top: "accuracy"
   include {
@@ -330,7 +330,7 @@ layer {
 layer {
   name: "loss"
   type: "SoftmaxWithLoss"
-  bottom: "fc8"
+  bottom: "fc8_new"
   bottom: "label"
   top: "loss"
 }
