@@ -56,7 +56,7 @@ WEIGHTS=$HOME/models/VGG_M_finetune/VGG_CNN_M_2048.caffemodel
 $CAFFE_ROOT/build/tools/caffe train \
     -solver $HOME/models/VGG_M_finetune/solver.prototxt \
     -gpu 0 \
-    -weights $WEIGHTS 2>&1 | tee $TRAINING_LOG_NAME 
+    -weights $WEIGHTS 2>&1 | tee $TRAINING_LOG_NAME | less
 
 # Resetting interrupt handling
 trap - INT

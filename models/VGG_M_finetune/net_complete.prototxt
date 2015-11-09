@@ -70,6 +70,14 @@ layer {
     num_output: 96
     kernel_size: 7
     stride: 2
+	weight_filler {
+	  type: "gaussian" # initialize the filters from a Gaussian
+	  std: 0.01        # distribution with stdev 0.01 (default mean: 0)
+    }
+	bias_filler {
+	  type: "constant" # initialize the biases to zero (0)
+      value: 0
+	}
   }
 }
 layer {
@@ -119,6 +127,14 @@ layer {
     pad: 1
     kernel_size: 5
     stride: 2
+	weight_filler {
+	  type: "gaussian" # initialize the filters from a Gaussian
+	  std: 0.01        # distribution with stdev 0.01 (default mean: 0)
+    }
+	bias_filler {
+	  type: "constant" # initialize the biases to zero (0)
+      value: 0
+	}
   }
 }
 layer {
@@ -167,6 +183,14 @@ layer {
     num_output: 512
     pad: 1
     kernel_size: 3
+	weight_filler {
+	  type: "gaussian" # initialize the filters from a Gaussian
+	  std: 0.01        # distribution with stdev 0.01 (default mean: 0)
+    }
+	bias_filler {
+	  type: "constant" # initialize the biases to zero (0)
+      value: 0
+	}
   }
 }
 layer {
@@ -192,6 +216,14 @@ layer {
     num_output: 512
     pad: 1
     kernel_size: 3
+	weight_filler {
+	  type: "gaussian" # initialize the filters from a Gaussian
+	  std: 0.01        # distribution with stdev 0.01 (default mean: 0)
+    }
+	bias_filler {
+	  type: "constant" # initialize the biases to zero (0)
+      value: 0
+	}
    }
 }
 layer {
@@ -217,6 +249,14 @@ layer {
     num_output: 512
     pad: 1
     kernel_size: 3
+	weight_filler {
+	  type: "gaussian" # initialize the filters from a Gaussian
+	  std: 0.01        # distribution with stdev 0.01 (default mean: 0)
+    }
+	bias_filler {
+	  type: "constant" # initialize the biases to zero (0)
+      value: 0
+	}
   }
 }
 layer {
@@ -251,6 +291,14 @@ layer {
   }
   inner_product_param {
     num_output: 4096
+	weight_filler {
+	  type: "gaussian" # initialize the filters from a Gaussian
+	  std: 0.01        # distribution with stdev 0.01 (default mean: 0)
+    }
+	bias_filler {
+	  type: "constant" # initialize the biases to zero (0)
+      value: 0
+	}
   }
 }
 layer {
@@ -283,6 +331,14 @@ layer {
   }
   inner_product_param {
     num_output: 2048
+	weight_filler {
+	  type: "gaussian" # initialize the filters from a Gaussian
+	  std: 0.01        # distribution with stdev 0.01 (default mean: 0)
+    }
+	bias_filler {
+	  type: "constant" # initialize the biases to zero (0)
+      value: 0
+	}
   }
 }
 layer {
@@ -315,6 +371,14 @@ layer {
   }
   inner_product_param {
     num_output: 2
+	weight_filler {
+	  type: "gaussian" # initialize the filters from a Gaussian
+	  std: 0.01        # distribution with stdev 0.01 (default mean: 0)
+    }
+	bias_filler {
+	  type: "constant" # initialize the biases to zero (0)
+      value: 0
+	}
   }
 }
 layer {

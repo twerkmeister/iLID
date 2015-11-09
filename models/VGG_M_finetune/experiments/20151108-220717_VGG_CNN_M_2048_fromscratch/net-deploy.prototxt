@@ -1,58 +1,11 @@
 name: "VGG_CNN_M_2048"
-layer {
-  name: "data"
-  type: "Data"
-  top: "data"
-  top: "label"
-  include {
-    phase: TRAIN
-  }
-#  transform_param {
-#    mirror: true
-#    crop_size: 240
-#    mean_file: "examples/ucf101_flow/flow_mean_1_2.binaryproto"
-#  }
-# mean pixel / channel-wise mean instead of mean image
-  transform_param {
-   mean_value: 104
-   mean_value: 117
-   mean_value: 123
-   mirror: false
-  }
-  data_param {
-    source: "/home/mpss2015m_1/DeepAudio/iLID-Data/languages/trainingdb"
-    batch_size: 10
-    backend: LEVELDB
-  }
+input: "data"
+input_shape {
+  dim: 1
+  dim: 3
+  dim: 224
+  dim: 224
 }
-layer {
-  name: "data"
-  type: "Data"
-  top: "data"
-  top: "label"
-  include {
-    phase: TEST
-  }
-#  transform_param {
-#    mirror: false
-#    crop_size: 240
-#   mean_file: "examples/ucf101_flow/flow_mean_1_2.binaryproto"
-#  }
-# mean pixel / channel-wise mean instead of mean image
-  transform_param {
-   crop_size: 224
-   mean_value: 104
-   mean_value: 117
-   mean_value: 123
-   mirror: false
-  }
-  data_param {
-    source: "/home/mpss2015m_1/DeepAudio/iLID-Data/languages/testdb"
-    batch_size: 4
-    backend: LEVELDB
-  }
-}
-
 layer {
   bottom: "data"
   top: "conv1"
@@ -318,14 +271,10 @@ layer {
   }
 }
 layer {
-  name: "accuracy"
-  type: "Accuracy"
+  name: "prob"
+  type: "Softmax"
   bottom: "fc8_new"
-  bottom: "label"
-  top: "accuracy"
-  include {
-    phase: TEST
-  }
+  top: "prob"
 }
 layer {
   name: "loss"
