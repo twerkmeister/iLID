@@ -49,8 +49,8 @@ def generate_spectrograms(input_path, output_path):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--inputPath', dest='input_path', default=os.getcwd(), help='Input Path to wav files')
-    parser.add_argument('--outputPath', dest='output_path', default=os.path.join(os.getcwd(), "spectrograms"),
+    parser.add_argument('--inputPath', dest='input_path', default=os.getcwd(), help='Input Path to wav files', required=True)
+    parser.add_argument('--outputPath', dest='output_path', default=os.path.join(os.getcwd(), "spectrograms"), required=True,
                         help='Output Path to wav files')
 
     args = parser.parse_args()
