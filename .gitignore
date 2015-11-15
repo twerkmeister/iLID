@@ -1,5 +1,9 @@
 *.caffemodel
 *.solverstate
 *.tlog
-*.wav
 *.pyc
+*.ipynb
+
+
+*.wav
+*.png
