@@ -1,2 +1,1 @@
-import argparser
-import filecollector
+__all__ = ["argparser", "filecollector"]
