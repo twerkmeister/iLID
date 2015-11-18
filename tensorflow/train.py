@@ -36,18 +36,18 @@ with tf.Session() as sess:
 
     while step * BATCH_SIZE < TRAINING_ITERS:
 
-	batch_xs, batch_ys = train_data.next_batch()
-	sess.run(optimizer, feed_dict={x: batch_xs, y: batch_ys})
+        batch_xs, batch_ys = train_data.next_batch()
+        sess.run(optimizer, feed_dict={x: batch_xs, y: batch_ys})
 
-	if step % DISPLAY_STEP == 0:
-	    acc = sess.run(accuracy, feed_dict={x: batch_xs, y: batch_ys})
-	    loss = sess.run(cost, feed_dict={x: batch_xs, y: batch_ys})
-	    print "Iter " + str(step * BATCH_SIZE) + ", Loss= " + "{:.6f}".format(
-		loss) + ", Training Accuracy= " + "{:.5f}".format(acc)
-	step += 1
+        if step % DISPLAY_STEP == 0:
+            acc = sess.run(accuracy, feed_dict={x: batch_xs, y: batch_ys})
+            loss = sess.run(cost, feed_dict={x: batch_xs, y: batch_ys})
+            print "Iter " + str(step * BATCH_SIZE) + ", Loss= " + "{:.6f}".format(
+                loss) + ", Training Accuracy= " + "{:.5f}".format(acc)
+        step += 1
 
     print "Optimization Finished!"
 
     # Accuracy on 256 mnist test images
     print "Accuracy:", sess.run(accuracy,
-				feed_dict={x: mnist.test.images[:256], y: mnist.test.labels[:256], keep_prob: 1.})
+                                feed_dict={x: mnist.test.images[:256], y: mnist.test.labels[:256], keep_prob: 1.})
