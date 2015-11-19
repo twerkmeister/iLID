@@ -21,10 +21,12 @@ pred = net.get_last_output()
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred, y))
 optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
+tf.scalar_summary("loss", cost)
 
 # Evaluate model
 correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.types.float32))
+tf.scalar_summary("accuracy", accuracy)
 
 # Train
 init = tf.initialize_all_variables()
@@ -33,6 +35,7 @@ test_data = CSVInput("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/
 
 # Summary for Tensorboard
 merged_summary_op = tf.merge_all_summaries()
+
 
 # Start Training
 with tf.Session() as sess:
@@ -48,15 +51,19 @@ with tf.Session() as sess:
 
         if step % DISPLAY_STEP == 0:
             batch_xs, batch_ys = test_data.next_batch()
-            summary_str = session.run(merged_summary_op)
-            summary_writer.add_summary(summary_str, total_step)
 
-            acc = sess.run(accuracy, feed_dict={x: batch_xs, y: batch_ys})
-            loss = sess.run(cost, feed_dict={x: batch_xs, y: batch_ys})
-            print "Iter " + str(step*BATCH_SIZE) + ", Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " + "{:.5f}".format(acc)
+            summary_str, acc, loss = sess.run([merged_summary_op, accuracy, cost], feed_dict={x: batch_xs, y: batch_ys})
+            summary_writer.add_summary(summary_str, step)
+
+            print "Iter " + str(step * BATCH_SIZE) + ", Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " + "{:.5f}".format(acc)
         step += 1
 
     print "Optimization Finished!"
+
+    # Finish summaries
+    summary_str = sess.run(merged_summary_op)
+    summary_writer.add_summary(summary_str, step)
+
 
     #Accuracy
     batch_xs, batch_ys = test_data.next_batch()
