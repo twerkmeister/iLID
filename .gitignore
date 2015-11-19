@@ -1,3 +1,5 @@
+logs/
+
 *.caffemodel
 *.solverstate
 *.tlog

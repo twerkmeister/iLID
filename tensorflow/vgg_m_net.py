@@ -7,7 +7,7 @@ class VGG_M_2048_NET(Network):
         super(self.__class__, self).__init__(input)
 
         # Make sure input image have right dimensions
-        assert input[1:] == [224, 224, 3]
+        assert input.get_shape()[1:] == [224, 224, 3]
 
         # conv(kernel_x, kernel_y, stride_x, stride_y, input size, output size)
         # pool(kernel_x, kernel_y, stride_x, stride_y)

@@ -9,8 +9,8 @@ BATCH_SIZE = 128
 DISPLAY_STEP = 10
 
 # Network Parameters
-INPUT_SHAPE = [224, 224, 3]  # Input Image shape
-NUM_CLASSES = 1  # Total classes
+INPUT_SHAPE = [224, 224, 3] # Input Image shape
+NUM_CLASSES = 1 # Total classes
 
 # Create model
 x = tf.placeholder(tf.types.float32, [None] + INPUT_SHAPE)
@@ -29,8 +29,15 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.types.float32))
 # Train
 init = tf.initialize_all_variables()
 train_data = CSVInput("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/train.csv", BATCH_SIZE, INPUT_SHAPE)
+test_data = CSVInput("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/train.csv", BATCH_SIZE, INPUT_SHAPE)
 
+# Summary for Tensorboard
+merged_summary_op = tf.merge_all_summaries()
+
+# Start Training
 with tf.Session() as sess:
+
+    summary_writer = tf.train.SummaryWriter("logs", sess.graph_def)
     sess.run(init)
     step = 1
 
@@ -40,14 +47,19 @@ with tf.Session() as sess:
         sess.run(optimizer, feed_dict={x: batch_xs, y: batch_ys})
 
         if step % DISPLAY_STEP == 0:
+            batch_xs, batch_ys = test_data.next_batch()
+            summary_str = session.run(merged_summary_op)
+            summary_writer.add_summary(summary_str, total_step)
+
             acc = sess.run(accuracy, feed_dict={x: batch_xs, y: batch_ys})
             loss = sess.run(cost, feed_dict={x: batch_xs, y: batch_ys})
-            print "Iter " + str(step * BATCH_SIZE) + ", Loss= " + "{:.6f}".format(
-                loss) + ", Training Accuracy= " + "{:.5f}".format(acc)
+            print "Iter " + str(step*BATCH_SIZE) + ", Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " + "{:.5f}".format(acc)
         step += 1
 
     print "Optimization Finished!"
 
-    # Accuracy on 256 mnist test images
-    print "Accuracy:", sess.run(accuracy,
-                                feed_dict={x: mnist.test.images[:256], y: mnist.test.labels[:256], keep_prob: 1.})
+    #Accuracy
+    batch_xs, batch_ys = test_data.next_batch()
+    print "Accuracy:", sess.run(accuracy, feed_dict={x: batch_xs, y: batch_ys})
+
+
