@@ -36,11 +36,12 @@ test_data = CSVInput("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/
 # Summary for Tensorboard
 merged_summary_op = tf.merge_all_summaries()
 
-
 # Start Training
 with tf.Session() as sess:
 
+    saver = tf.train.Saver()
     summary_writer = tf.train.SummaryWriter("logs", sess.graph_def)
+
     sess.run(init)
     step = 1
 
@@ -55,7 +56,10 @@ with tf.Session() as sess:
             summary_str, acc, loss = sess.run([merged_summary_op, accuracy, cost], feed_dict={x: batch_xs, y: batch_ys})
             summary_writer.add_summary(summary_str, step)
 
-            print "Iter " + str(step * BATCH_SIZE) + ", Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " + "{:.5f}".format(acc)
+	    iteration = str(step * BATCH_SIZE)
+	    saver.save(sess, "snapshots/VGG_M_2048_NET.tensormodel", global_step=step * BATCH_SIZE)
+	    print "Iter {0}, Loss= {1:.6f}, Training Accuracy= {2:.5f}".format(iteration, loss, acc)
+
         step += 1
 
     print "Optimization Finished!"
