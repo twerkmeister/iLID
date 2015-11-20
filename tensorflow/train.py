@@ -31,7 +31,7 @@ tf.scalar_summary("accuracy", accuracy)
 # Train
 init = tf.initialize_all_variables()
 train_data = CSVInput("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/train.csv", BATCH_SIZE, INPUT_SHAPE)
-test_data = CSVInput("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/train.csv", BATCH_SIZE, INPUT_SHAPE)
+test_data = CSVInput("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/test.csv", BATCH_SIZE, INPUT_SHAPE)
 
 # Summary for Tensorboard
 merged_summary_op = tf.merge_all_summaries()
@@ -59,11 +59,6 @@ with tf.Session() as sess:
         step += 1
 
     print "Optimization Finished!"
-
-    # Finish summaries
-    summary_str = sess.run(merged_summary_op)
-    summary_writer.add_summary(summary_str, step)
-
 
     #Accuracy
     batch_xs, batch_ys = test_data.next_batch()

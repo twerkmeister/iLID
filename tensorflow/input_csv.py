@@ -36,11 +36,8 @@ class CSVInput():
         sys.stderr.write(
             "Sample size is smaller than batch size. Oversampling to fill up. ({0} < {1})\n".format(self.sample_size,
                                                                                                     self.batch_size))
-
-        size_diff = self.batch_size - self.sample_size
-        shuffled_images, shuffled_labels = self.get_shuffled_samples()
-        self.images = np.append(self.images, shuffled_images[:size_diff])
-        self.labels = np.append(self.labels, shuffled_labels[:size_diff])
+	self.images = np.resize(self.images, [self.batch_size])
+	self.labels = np.resize(self.labels, [self.batch_size])
 
         self.sample_size = len(self.images)
 
@@ -75,8 +72,8 @@ class CSVInput():
 
         # Only decode the PNGs need for one batch
         for i, index in enumerate(range(start, end)):
-            images[index,] = self.read_png(self.images[i])
-            labels[index,] = self.labels[i]
+	  images[index,] = self.read_png(self.images[i])
+	  labels[index,] = self.labels[i]
 
         # Sanity checks
         assert images.shape[0] == self.batch_size
