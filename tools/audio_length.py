@@ -4,7 +4,7 @@ import sys
 
 
 def get_audio_length(f):
-  command = "soxi -D %s" % f
+  command = "soxi -D \"%s\"" % f
   return float(subprocess.check_output(command, shell=True))
 
 if __name__ == '__main__':
