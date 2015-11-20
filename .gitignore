@@ -1,11 +1,12 @@
 logs/
+dist/
 
 *.caffemodel
 *.solverstate
 *.tlog
 *.pyc
 *.ipynb
-
+*.egg-info
 
 *.wav
 *.png

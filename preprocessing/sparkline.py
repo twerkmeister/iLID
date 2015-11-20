@@ -1,21 +1,36 @@
 from pyspark import SparkContext
 from util import *
+import audio
+import graphic
+import output
 import scipy.io.wavfile as wav
 import sys
 
-def main(files):
-  sc = SparkContext("local", "sparkline", )
-  samplerate_counts = (
-    sc.parallelize(files)
-    .map(lambda f: wav.read(f))
-    .map(lambda samplerate_and_signal: (samplerate_and_signal[0], 1))
-    .reduceByKey(lambda a,b: a + b))
+def read_wav(f):
+  return (f, wav.read(f))
 
-  print samplerate_counts.collect()
+def apply_melfilter(f, samplerate, signal):
+  print "f:", f
+  print "samplerate:", samplerate
+  print "signal:", signal
+  filterbank_energies = audio.melfilterbank.logfilter(samplerate, signal)
+  return (f, filterbank_energies)
+
+def main(args):
+  files = filecollector.collect(args.input_path)
+
+  sc = SparkContext("local", "sparkline", )
+  pipeline = (
+    sc.parallelize(files)
+    .map(lambda f: read_wav(f))
+    .map(lambda (f, samplerate_and_signal): apply_melfilter(f, samplerate_and_signal[0], samplerate_and_signal[1]))
+    .map(lambda (f, filterbank_energies): (f, graphic.colormapping.to_rgb(filterbank_energies, bytes=True)))
+    .map(lambda (f, image): output.image.save(f, image, args.output_path)))
+  
+  pipeline.collect()
+
 
 if __name__ == '__main__':
 
   args = argparser.parse()
-  files = filecollector.collect(args.input_path)
-  print files
-  main(files)
+  main(args)
