@@ -2,11 +2,11 @@ import os
 import subprocess
 import sys
 
-def escapeSingleQuotes(s):
-  return s.replace("'", "\\'")
+def escape_dollar_sign(s):
+  return s.replace("$", "\\$")
 
 def get_audio_length(f):
-  command = "soxi -D '%s'" % escapeSingleQuotes(f)
+  command = "soxi -D \"%s\"" % escape_dollar_sign(f)
   return float(subprocess.check_output(command, shell=True))
 
 if __name__ == '__main__':
