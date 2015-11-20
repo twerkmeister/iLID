@@ -2,6 +2,8 @@ import os
 import subprocess
 import sys
 
+def escapeSingleQuotes(s):
+  return s.replace("'", "\\'")
 
 def get_audio_length(f):
   command = "soxi -D '%s'" % f
