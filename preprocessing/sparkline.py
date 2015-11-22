@@ -10,9 +10,6 @@ def read_wav(f):
   return (f, wav.read(f))
 
 def apply_melfilter(f, samplerate, signal):
-  print "f:", f
-  print "samplerate:", samplerate
-  print "signal:", signal
   filterbank_energies = audio.melfilterbank.logfilter(samplerate, signal)
   return (f, filterbank_energies)
 
@@ -25,7 +22,8 @@ def main(args):
     .map(lambda f: read_wav(f))
     .map(lambda (f, samplerate_and_signal): apply_melfilter(f, samplerate_and_signal[0], samplerate_and_signal[1]))
     .map(lambda (f, filterbank_energies): (f, graphic.colormapping.to_rgb(filterbank_energies, bytes=True)))
-    .map(lambda (f, image): output.image.save(f, image, args.output_path)))
+    .map(lambda (f, image): (f, list(graphic.windowing.sliding(image, 600, 600))))
+    .map(lambda (f, images): output.image.save(f, images, args.output_path)))
   
   pipeline.collect()
 

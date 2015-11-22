@@ -1,3 +1,4 @@
-__all__ = ["colormapping"]
+__all__ = ["colormapping", "windowing"]
 
 import colormapping
+import windowing
