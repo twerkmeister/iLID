@@ -1,0 +1,3 @@
+[submodule "tools/neg23"]
+	path = tools/neg23
+	url = git@github.com:kylophone/neg23.git
