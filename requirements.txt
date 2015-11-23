@@ -1,0 +1,5 @@
+scipy=0.16.1
+numpy=1.10.1
+matplotlib=1.5.0
+speech-features=0.1
+nose=1.3.7
