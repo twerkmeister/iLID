@@ -1,4 +1,4 @@
-import pylab
+import matplotlib.cm
 import numpy as np
 import cv2 as cv
 
@@ -15,7 +15,7 @@ def to_rgba(signal, colormap="gray", norm=None, bytes=False):
       image (3 dimensional numpy array): rgba array
 
   """
-  colormapper = pylab.cm.ScalarMappable(norm, colormap)
+  colormapper = matplotlib.cm.ScalarMappable(norm, colormap)
   image = colormapper.to_rgba(signal, bytes=bytes)
   return image
 
