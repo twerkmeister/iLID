@@ -33,3 +33,11 @@ def to_rgb(signal, *args, **kwargs):
   image = to_rgba(signal, *args, **kwargs)
   #drop alpha channel
   return image[:,:,:-1]
+
+def to_grayscale(signal, *args, **kwargs):
+  """
+  """
+  image = to_rgb(signal, *args, **kwargs)
+  result = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
+  assert result.shape[2] = 1
+  return result
