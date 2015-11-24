@@ -6,6 +6,8 @@ class VGG_M_2048_NET(Network):
     def __init__(self, input, num_classes):
         super(self.__class__, self).__init__(input)
 
+        self.name = "VGG_M_2048"
+
         # Make sure input image have right dimensions
         assert input.get_shape()[1:] == [224, 224, 3]
 

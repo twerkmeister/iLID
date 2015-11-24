@@ -1,26 +1,20 @@
 import tensorflow as tf
+import yaml
+import os
 from input_csv import CSVInput
 from vgg_m_net import VGG_M_2048_NET
 
-# Parameters
-LEARNING_RATE = 0.001
-TRAINING_ITERS = 100000
-BATCH_SIZE = 128
-DISPLAY_STEP = 10
-
-# Network Parameters
-INPUT_SHAPE = [224, 224, 3] # Input Image shape
-NUM_CLASSES = 1 # Total classes
+config = yaml.load(file("config.yaml"))
 
 # Create model
-x = tf.placeholder(tf.types.float32, [None] + INPUT_SHAPE)
-y = tf.placeholder(tf.types.float32, [None, NUM_CLASSES])
+x = tf.placeholder(tf.types.float32, [None] + config["INPUT_SHAPE"])
+y = tf.placeholder(tf.types.float32, [None] + config["OUTPUT_SHAPE"])
 
-net = VGG_M_2048_NET(x, NUM_CLASSES)
+net = VGG_M_2048_NET(x, config["OUTPUT_SHAPE"][0])
 pred = net.get_last_output()
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred, y))
-optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=config["LEARNING_RATE"]).minimize(cost)
 tf.scalar_summary("loss", cost)
 
 # Evaluate model
@@ -30,32 +24,37 @@ tf.scalar_summary("accuracy", accuracy)
 
 # Train
 init = tf.initialize_all_variables()
-train_data = CSVInput("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/train.csv", BATCH_SIZE, INPUT_SHAPE)
-test_data = CSVInput("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/test.csv", BATCH_SIZE, INPUT_SHAPE)
+train_data = CSVInput(config["TRAINING_DATA"], config["BATCH_SIZE"], config["INPUT_SHAPE"], config["OUTPUT_SHAPE"])
+test_data = CSVInput(config["TEST_DATA"], config["BATCH_SIZE"], config["INPUT_SHAPE"], config["OUTPUT_SHAPE"])
 
 # Summary for Tensorboard
 merged_summary_op = tf.merge_all_summaries()
 
-
 # Start Training
 with tf.Session() as sess:
 
-    summary_writer = tf.train.SummaryWriter("logs", sess.graph_def)
+    saver = tf.train.Saver()
+    summary_writer = tf.train.SummaryWriter(config["LOG_PATH"], sess.graph_def)
+
     sess.run(init)
     step = 1
 
-    while step * BATCH_SIZE < TRAINING_ITERS:
+    while step * config["BATCH_SIZE"] < config["TRAINING_ITERS"]:
 
         batch_xs, batch_ys = train_data.next_batch()
         sess.run(optimizer, feed_dict={x: batch_xs, y: batch_ys})
 
-        if step % DISPLAY_STEP == 0:
+        if step % config["DISPLAY_STEP"] == 0:
             batch_xs, batch_ys = test_data.next_batch()
 
             summary_str, acc, loss = sess.run([merged_summary_op, accuracy, cost], feed_dict={x: batch_xs, y: batch_ys})
             summary_writer.add_summary(summary_str, step)
 
-            print "Iter " + str(step * BATCH_SIZE) + ", Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " + "{:.5f}".format(acc)
+            iteration = str(step * config["BATCH_SIZE"])
+            path = "{0}.tensormodel".format(os.path.join(config["SNAPSHOT_PATH"], net.name))
+            saver.save(sess, path, global_step=step * config["BATCH_SIZE"])
+            print "Iter {0}, Loss= {1:.6f}, Training Accuracy= {2:.5f}".format(iteration, loss, acc)
+
         step += 1
 
     print "Optimization Finished!"

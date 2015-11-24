@@ -3,6 +3,7 @@ import tensorflow as tf
 
 class Network(object):
     def __init__(self, input):
+        self.name = "Unnamed"
         self.layers = []
         self.add_layer("input", input)
 
