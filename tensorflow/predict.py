@@ -2,29 +2,39 @@ import tensorflow as tf
 import numpy as np
 import yaml
 from scipy.ndimage import imread
-from vgg_m_net import VGG_M_2048_NET
+from vgg_m_net import VGG_M_2048_NET as Network
 
 config = yaml.load(file("config.yaml"))
 
-# Create model
-x = tf.placeholder(tf.types.float32, [None] + config["INPUT_SHAPE"])
+def predict(image_path, model_path):
 
-prediction_input = np.empty([1] + config["INPUT_SHAPE"])
-prediction_input[0:] = imread("/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/voxforge/train/spectrogram_7.png", mode="RGB")
+    # Create model
+    x = tf.placeholder(tf.types.float32, [None] + config["INPUT_SHAPE"])
 
-net = VGG_M_2048_NET(x, config["OUTPUT_SHAPE"][0])
-pred = tf.nn.softmax(net.get_last_output())
+    prediction_input = np.empty([1] + config["INPUT_SHAPE"])
+    prediction_input[0:] = imread(image_path, mode="RGB")
 
-# Start Prediction
-with tf.Session() as sess:
+    net = Network(x, config["OUTPUT_SHAPE"][0])
+    pred = tf.nn.softmax(net.get_last_output())
 
-    saver = tf.train.Saver()
-    saver.restore(sess, "/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/snapshots/VGG_M_2048_NET.tensormodel-896")
+    # Start Prediction
+    with tf.Session() as sess:
 
-    prediction = sess.run(pred, feed_dict={x: prediction_input})
-    label = tf.argmax(prediction, 1)
+        saver = tf.train.Saver()
+        saver.restore(sess, model_path)
 
-    print "Probabilities: ", prediction
-    print "Label: ", label
+        prediction = sess.run(pred, feed_dict={x: prediction_input})
+        label = tf.argmax(prediction, 1)
+
+        print "Probabilities: ", prediction
+        print "Label: ", label
+
+    return prediction, label
 
 
+if __name__ == "__main__":
+
+    image = "/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/voxforge/train/spectrogram_7.png"
+    model = "/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/snapshots/VGG_M_2048.tensormodel-1280"
+
+    predict(image, model)

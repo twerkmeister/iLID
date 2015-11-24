@@ -51,8 +51,12 @@ class CSVInput():
 
     def read_png(self, file_path):
 
-        return imread(file_path, mode="RGB")
+        mode = "RGB" if self.input_shape[2] == 3 else "L" # L = B/W
+        image = imread(file_path, mode=mode)
 
+        if not list(image.shape) == self.input_shape:
+          sys.exit("Input image shape does not match specified shape. {0} != {1}".format(image.shape, self.input_shape))
+        return image
 
     def next_batch(self):
 
@@ -76,12 +80,6 @@ class CSVInput():
         for i, index in enumerate(range(start, end)):
           images[index,] = self.read_png(self.images[i])
           labels[index, self.labels[i]] = 1 # one hot labels
-
-        # Sanity checks
-        assert images.shape[0] == self.batch_size
-        assert images.shape[1] == self.input_shape[0]
-        assert images.shape[2] == self.input_shape[1]
-        assert images.shape[3] == self.input_shape[2]
 
         # Convert from [0, 255] -> [0.0, 1.0].
         images = images.astype(np.float32)

@@ -1,11 +1,11 @@
-# Parameters
+# Learning Parameters
 LEARNING_RATE : 0.001
 BATCH_SIZE : 128
 TRAINING_ITERS : 100000
 DISPLAY_STEP : 10
 
-# Network Parameters
-INPUT_SHAPE : [224, 224, 3] # Input Image shape
+# Network Data Parameters
+INPUT_SHAPE : [600, 39, 1] # Input Image shape
 OUTPUT_SHAPE : [2] # Total classes as vector
 
 # Datasets

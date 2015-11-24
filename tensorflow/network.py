@@ -2,10 +2,15 @@ import tensorflow as tf
 
 
 class Network(object):
-    def __init__(self, input):
+    def __init__(self):
         self.name = "Unnamed"
         self.layers = []
-        self.add_layer("input", input)
+
+        self.input_shape = None # [20, 20, 3]  w x h x channels
+        self.output_shape = None # [2] one hot vector for classes
+
+    def build_net(self, input):
+        raise Exception("Need to be implemented in subclass!")
 
     def create_variable(self, name, shape):
         return tf.get_variable(name, shape, initializer=tf.random_normal_initializer())
@@ -19,6 +24,10 @@ class Network(object):
 
     def get_last_output(self):
         return self.layers[-1][1]
+
+    def input(self, input):
+        self.add_layer("input", input)
+        return self
 
     def conv(self, kx, ky, sx, sy, in_size, out_size, name=None):
         name = name or self.get_unique_name("conv")
@@ -71,6 +80,11 @@ class Network(object):
         return self
 
     def debug(self, name=None):
+
+        # Make sure we have all the right params for the network.
+        assert(self.input_shape)
+        assert(self.output_shape)
+
         name = name or self.get_unique_name("debug")
 
         input = self.get_last_output()
