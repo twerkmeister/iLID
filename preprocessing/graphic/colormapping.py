@@ -35,9 +35,16 @@ def to_rgb(signal, *args, **kwargs):
   return image[:,:,:-1]
 
 def to_grayscale(signal, *args, **kwargs):
-  """
+  """converts a two dimensional numpy array to an grayscale array
+
+  Args:
+      signal (2 dimensional numpy array): the data the colormap should be applied to
+      *args: piped through to to_rgb
+      **kwargs: pipe through to to_rgb
+
+  Returns:
+      image (2 dimensional numpy array): grayscale array
   """
   image = to_rgb(signal, *args, **kwargs)
   result = cv.cvtColor(image, cv.COLOR_RGB2GRAY)
-  assert result.shape[2] = 1
   return result
