@@ -1,0 +1,17 @@
+# Learning Parameters
+LEARNING_RATE : 0.001
+BATCH_SIZE : 128
+TRAINING_ITERS : 100000
+DISPLAY_STEP : 10
+
+# Network Data Parameters
+INPUT_SHAPE : [600, 39, 1] # Input Image shape
+OUTPUT_SHAPE : [2] # Total classes as vector
+
+# Datasets
+TRAINING_DATA : "/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/train.csv"
+TEST_DATA : "/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/test.csv"
+
+# Logging
+LOG_PATH : "logs"
+SNAPSHOT_PATH : "snapshots"
