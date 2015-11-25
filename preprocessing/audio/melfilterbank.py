@@ -23,7 +23,7 @@ def filter(samplerate, signal, winlen=0.02, winstep=0.01,
   feat, energy = speechfeatures.fbank(np.array(signal), samplerate, winlen=winlen,winstep=winstep,
             nfilt=nfilt, nfft=nfft, lowfreq=lowfreq, highfreq=highfreq, preemph=preemph)
 
-  return np.transpose(feat)
+  return np.swapaxes(feat,0,1)
 
 
 def logfilter(samplerate, signal, *args, **kwargs):
