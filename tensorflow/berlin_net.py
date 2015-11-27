@@ -8,7 +8,7 @@ class BERLIN_NET(Network):
 
         # Basic setup
         self.name = "Berlin Net"
-        self.input_shape = [600, 31, 1]
+        self.input_shape = [39, 600, 1]
         self.output_shape = [2]
 
     def build_net(self, input):
@@ -36,8 +36,11 @@ class BERLIN_NET(Network):
             .debug()
             .conv(6, 6, 1, 1, 12, 12, name="conv3")
             .debug()
-            .pool(1, 141, 2, 2)
+            .pool(2, 2, 2, 2)
             .debug()
+            .fc(5*75*12, 1024)
+            .fc(1024,2)
+
         )
 
         return self.get_last_output()

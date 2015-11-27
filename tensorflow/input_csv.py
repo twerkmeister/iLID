@@ -53,7 +53,8 @@ class CSVInput():
 
         mode = "RGB" if self.input_shape[2] == 3 else "L" # L = B/W
         image = imread(file_path, mode=mode)
-
+        if mode == "L":
+            image = np.reshape(image, image.shape+(1,))
         if not list(image.shape) == self.input_shape:
           sys.exit("Input image shape does not match specified shape. {0} != {1}".format(image.shape, self.input_shape))
         return image
@@ -77,7 +78,8 @@ class CSVInput():
         labels = np.zeros(label_shape)
 
         # Only decode the PNGs need for one batch
-        for i, index in enumerate(range(start, end)):
+        for index, i in enumerate(range(start, end)):
+          #print self.images[i], self.labels[i]
           images[index,] = self.read_png(self.images[i])
           labels[index, self.labels[i]] = 1 # one hot labels
 

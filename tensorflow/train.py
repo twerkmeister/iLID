@@ -2,8 +2,8 @@ import tensorflow as tf
 import yaml
 import os
 from input_csv import CSVInput
-from vgg_m_net import VGG_M_2048_NET as Network
-#from berlin_net import BERLIN_NET as Network
+#from vgg_m_net import VGG_M_2048_NET as Network
+from berlin_net import BERLIN_NET as Network
 
 config = yaml.load(file("config.yaml"))
 
@@ -14,6 +14,7 @@ y = tf.placeholder(tf.types.float32, [None] + net.output_shape)
 
 # Learning operation
 logits = net.build_net(x)
+
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, y))
 optimizer = tf.train.AdamOptimizer(learning_rate=config["LEARNING_RATE"]).minimize(cost)
 tf.scalar_summary("loss", cost)
