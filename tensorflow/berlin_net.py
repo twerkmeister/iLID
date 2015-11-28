@@ -39,7 +39,7 @@ class BERLIN_NET(Network):
             .pool(2, 2, 2, 2)
             .debug()
             .fc(5*75*12, 1024)
-            .fc(1024,2)
+            .softmax_linear(1024,2)
 
         )
 

@@ -14,7 +14,6 @@ y = tf.placeholder(tf.types.float32, [None] + net.output_shape)
 
 # Learning operation
 logits = net.build_net(x)
-
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, y))
 optimizer = tf.train.AdamOptimizer(learning_rate=config["LEARNING_RATE"]).minimize(cost)
 tf.scalar_summary("loss", cost)

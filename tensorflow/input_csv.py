@@ -61,16 +61,18 @@ class CSVInput():
 
     def next_batch(self):
 
-        # Start a new epoch if all samples were used at least once
-        if self.next_batch_start >= self.sample_size:
-            self.epochs_completed += 1
-
-            self.images, self.labels = self.get_shuffled_samples()
-            self.next_batch_start = 0
-
-        # Gather the images for the next batch
         start = self.next_batch_start
         end = start + self.batch_size
+
+        # Start a new epoch if all samples were used at least once
+        if end >= self.sample_size:
+            self.epochs_completed += 1
+            self.images, self.labels = self.get_shuffled_samples()
+            self.next_batch_start = 0
+            start = self.next_batch_start
+            end = start + self.batch_size
+
+        # Gather the images for the next batch
 
         image_shape = [self.batch_size] + self.input_shape
         label_shape = [self.batch_size] + self.output_shape

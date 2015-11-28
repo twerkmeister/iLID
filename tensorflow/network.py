@@ -67,6 +67,20 @@ class Network(object):
 
         return self
 
+    def softmax_linear(self, in_size, out_size, name=None):
+        name = name or self.get_unique_name("softmax_linear")
+
+        with tf.variable_scope(name) as scope:
+            input = self.get_last_output()
+            weights = self.create_variable("weights", [in_size, out_size])
+            bias = self.create_variable("bias", [out_size])
+
+            softmax_linear = tf.nn.xw_plus_b(input, weights, bias, name=scope.name)
+
+            self.add_layer(name, softmax_linear)
+
+        return self
+
     def lrn(self, name=None):
         return self
 
