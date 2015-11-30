@@ -75,7 +75,7 @@ class Network(object):
 
     def make_path(self, path):
         if not os.path.isdir(path):
-            os.path.mkdir(path)
+            os.mkdir(path)
 
     def set_log_path(self, log_path):
         self.log_path = log_path
