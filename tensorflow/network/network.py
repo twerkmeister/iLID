@@ -52,15 +52,12 @@ class Network(object):
                 loop(layer.previous_layer)
         loop(self.layers)
 
-    def add_training_input(self, training_set, test_set):
+    def set_training_input(self, training_set, test_set):
         self.training_set = training_set
         self.test_set = test_set
         assert(training_set.input_shape == test_set.input_shape)
         assert(training_set.input_shape == self.input_shape)
         assert([training_set.num_labels] == self.output_shape)
-
-    def add_prediction_input(self):
-        pass
 
     def set_cost(self, logits_cost_function = tf.nn.softmax_cross_entropy_with_logits):
         #Last Layer should be softmax_linear
@@ -88,7 +85,20 @@ class Network(object):
         self.snapshot_path = snapshot_path
         self.make_path(snapshot_path)
 
-    def run(self, batch_size, iterations, display_step = 100):
+    def predict(self, model_path, images):
+        with tf.Session() as sess:
+            pred = tf.nn.softmax(self.layers.output)
+            saver = tf.train.Saver()
+            saver.restore(sess, model_path)
+            prediction = sess.run(pred, feed_dict={self.x: images})
+            label = tf.argmax(prediction, dimension=1)
+            print "Probabilities: ", prediction
+            print "Label: ", label
+            print prediction.shape
+
+        return prediction, label
+
+    def train(self, batch_size, iterations, display_step = 100):
         init = tf.initialize_all_variables()
         self.merged_summary_op = tf.merge_all_summaries()
 
@@ -96,10 +106,10 @@ class Network(object):
             self.saver = tf.train.Saver()
             self.summary_writer = tf.train.SummaryWriter(self.log_path, sess.graph_def)
             sess.run(init)
-            self.train(sess, batch_size, iterations, display_step)
+            self.optimize(sess, batch_size, iterations, display_step)
             self.evaluate(sess, batch_size)
 
-    def train(self, sess, batch_size, iterations, display_step):
+    def optimize(self, sess, batch_size, iterations, display_step):
             step = 0
             while step < iterations:
                 batch_xs, batch_ys = self.training_set.next_batch(batch_size)

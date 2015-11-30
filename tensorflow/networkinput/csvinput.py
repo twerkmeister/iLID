@@ -76,8 +76,6 @@ class CSVInput(NetworkInput):
                 else:
                     return images, labels
 
-        images, labels = loop(batch_size)
-        images = images.astype(np.float32)
-        images = np.multiply(images, 1.0 / 255.0)
-        return images, labels
+        return loop(batch_size)
+        
 

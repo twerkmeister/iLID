@@ -2,38 +2,22 @@ import tensorflow as tf
 import numpy as np
 import yaml
 from scipy.ndimage import imread
-from network.instances import berlin_net as net
+from network.instances.berlinnet import berlin_net
 import networkinput
+import argparse
 
 config = yaml.load(file("config.yaml"))
 
 def predict(image_path, model_path):
+    image = networkinput.read_png(image_path, "L")
+    berlin_net.predict(model_path, np.expand_dims(image, axis=0))
 
-    # Create model
-    x = tf.placeholder(tf.types.float32, [None] + config["INPUT_SHAPE"])
+if __name__ == "__main__":  
 
-    prediction_input = networkinput.read_png("image_path")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--image', dest='image_path', help='Path to image file', required=True)
+    parser.add_argument('--model', dest='model_path', required=True, help='Path to saved tensorflow model')
 
-    pred = tf.nn.softmax(net.layers.output)
+    args = parser.parse_args()
 
-    # Start Prediction
-    with tf.Session() as sess:
-
-        saver = tf.train.Saver()
-        saver.restore(sess, model_path)
-
-        prediction = sess.run(pred, feed_dict={x: prediction_input})
-        label = tf.argmax(prediction, 1)
-
-        print "Probabilities: ", prediction
-        print "Label: ", label
-
-    return prediction, label
-
-
-if __name__ == "__main__":
-
-    image = "/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/voxforge/train/spectrogram_7.png"
-    model = "/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/snapshots/VGG_M_2048.tensormodel-1280"
-
-    predict(image, model)
+    predict(args.image_path, args.model_path)
