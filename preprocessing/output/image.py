@@ -14,7 +14,7 @@ def save(filename, images, output_path=None):
     counter = "_%02d" % i 
     filename = "".join([filename_split[0], counter, ".png"])
 
-    print filename
+    #print filename
     cv.imwrite(filename, images[i])
     
   return filename
