@@ -2,7 +2,7 @@ import tensorflow as tf
 import os
 from layer import *
 
-class NetworkX(object):
+class Network(object):
     def __init__(self, name, hidden_layers):
         self.name = name
         self.layers = None
