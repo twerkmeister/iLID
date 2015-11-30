@@ -3,92 +3,99 @@ import csv
 from scipy.ndimage import imread
 import sys
 
-
-class CSVInput():
-    def __init__(self, file_path, batch_size, input_shape, output_shape):
-
-        self.batch_size = batch_size
+class NetworkInput(object):
+    def __init__(self, path, input_shape, num_labels):
+        self.path = path
+        self.num_labels = num_labels
+        self.batch_start = 0
+        self.epochs_completed = 0
         self.input_shape = input_shape
-        self.output_shape = output_shape
 
+    def next_batch(self, batch_size):
+        raise NotImplemented
+
+    def create_label_vector(self, label):
+        v = np.zeros((1, self.num_labels))
+        v[label] = 1
+        return v
+
+class CSVInput(NetworkInput):
+    def __init__(self, path, input_shape, num_labels, delimiter=",", mode="RGB", shuffle=False):
+        super(CSVInput, self).__init__(path, input_shape, num_labels)
+        self.delimiter = delimiter
+        self.mode = mode
+        self.shuffle = shuffle
+        self.initialize_input()
+
+    def initialize_input(self):
         self.images = np.array([])
         self.labels = np.array([])
-        self.next_batch_start = 0
-        self.epochs_completed = 0
-
-        # Read all image file paths and labels from CSV
-        with open(file_path, "rb") as csvfile:
-
-            reader = csv.reader(csvfile, delimiter=",")
-
+        with open(self.path, "rb") as csvfile:
+            reader = csv.reader(csvfile, delimiter=self.delimiter)
             for row in reader:
                 image, label = row
-
                 self.images = np.append(self.images, image)
                 self.labels = np.append(self.labels, label)
-
-            # In case we have less samples than batch size fill it up
-            self.sample_size = len(self.images)
-            if self.sample_size < self.batch_size:
-                self.fill_up_samples()
-
-    def fill_up_samples(self):
-
-        sys.stderr.write(
-            "Sample size is smaller than batch size. Oversampling to fill up. ({0} < {1})\n".format(self.sample_size,
-                                                                                                    self.batch_size))
-        self.images = np.resize(self.images, [self.batch_size])
-        self.labels = np.resize(self.labels, [self.batch_size])
-
-        self.sample_size = len(self.images)
-
-    def get_shuffled_samples(self):
-
-        perm = np.arange(self.sample_size)
-        np.random.shuffle(perm)
-
-        return self.images[perm], self.labels[perm]
+        self.sample_size = self.images.shape[0]
+        self.shuffled_images = None
+        self.shuffled_labels = None
 
     def read_png(self, file_path):
-
-        mode = "RGB" if self.input_shape[2] == 3 else "L" # L = B/W
         image = imread(file_path, mode=mode)
-        if mode == "L":
+        if self.mode == "L":
+            #Adding third dimension to fit channel structure
             image = np.reshape(image, image.shape+(1,))
-        if not list(image.shape) == self.input_shape:
-          sys.exit("Input image shape does not match specified shape. {0} != {1}".format(image.shape, self.input_shape))
+        assert(len(image.shape) >= 3)
         return image
 
-    def next_batch(self):
+    def get_shuffled_samples(self):
+        perm = np.arange(self.sample_size)
+        np.random.shuffle(perm)
+        return self.images[perm], self.labels[perm]
 
-        start = self.next_batch_start
-        end = start + self.batch_size
+    def _read(self, start, batch_size, image_paths, labels):
+        images_read = [read_png(path) for path in image_paths[start:start+batch_size]]
+        labels_read = [create_label_vector(label) for label in labels[start:start+batch_size]]
+        assert(images_read.shape[1:] == self.input_shape)
+        assert(labels_read.size == self.num_labels)
+        return images_read, labels_read
 
-        # Start a new epoch if all samples were used at least once
-        if end >= self.sample_size:
-            self.epochs_completed += 1
-            self.images, self.labels = self.get_shuffled_samples()
-            self.next_batch_start = 0
-            start = self.next_batch_start
-            end = start + self.batch_size
+    def _read_ordered(self, start, batch_size):
+        return self._read(start, batch_size, self.images, self.labels)
+        
+    def _read_random(self, start, batch_size):
+        if start == 0 or not self.shuffled_images or not self.shuffled_labels:
+            self.shuffled_images, self.shuffled_labels = self.get_shuffled_samples()
 
-        # Gather the images for the next batch
+        return self._read(start, batch_size, self.shuffled_images, self.shuffled_labels)
 
-        image_shape = [self.batch_size] + self.input_shape
-        label_shape = [self.batch_size] + self.output_shape
-        images = np.zeros(image_shape)
-        labels = np.zeros(label_shape)
+    def _read_images_and_labels(self, batch_start, batch_size):
+        if self.shuffle:
+            return self._read_random(self.batch_start, batch_size)
+        else:
+            return self._read_ordered(self.batch_start, batch_size)
 
-        # Only decode the PNGs need for one batch
-        for index, i in enumerate(range(start, end)):
-          #print self.images[i], self.labels[i]
-          images[index,] = self.read_png(self.images[i])
-          labels[index, self.labels[i]] = 1 # one hot labels
+    def next_batch(self, batch_size):
+        def loop(batch_size, accumulated_images, accumulated_labels):
+            if self.batch_start + batch_size >= self.sample_size:
+                remaining_batch_size = self.sample_size - self.batch_start
+                next_epoch_batch_size = batch_size - remaining_batch_size
+                images, labels = self._read_images_and_labels(self.batch_start, remaining_batch_size)
 
-        # Convert from [0, 255] -> [0.0, 1.0].
+                self.epochs_completed += 1
+                self.batch_start = 0
+                
+                return loop(next_epoch_batch_size, 
+                            np.append(accumulated_images, images, axis=0), 
+                            np.append(accumulated_labels, labels, axis=0))
+
+            else:
+                images, labels = self._read_images_and_labels(self.batch_start, batch_size)
+                self.batch_start += batch_size
+                return np.append(accumulated_images, images, axis=0), np.append(accumulated_labels, labels, axis=0)
+
+        images, labels = loop(batch_size, np.array([]), np.array([]))
         images = images.astype(np.float32)
         images = np.multiply(images, 1.0 / 255.0)
-
-        self.next_batch_start = end
-
         return images, labels
+

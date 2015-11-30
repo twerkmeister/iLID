@@ -1,108 +1,119 @@
 import tensorflow as tf
+import os
+from layer import *
 
+class NetworkX(object):
+    def __init__(self, name, hidden_layers):
+        self.name = name
+        self.layers = None
+        self.input_layer = None
+        self.x = None
+        self.y = None
+        self.training_set = None
+        self.test_set = None
+        self.cost = None
+        self.optimizer = None
+        self.set_log_path = None
+        self.set_snapshot_path = None
+        self.hidden_layers = hidden_layers
 
-class Network(object):
-    def __init__(self):
-        self.name = "Unnamed"
-        self.layers = []
+    def build(self):
+        if not self.input_layer:
+            raise Exception("Input needs to be added first")
+        for hidden_layer in self.hidden_layers:
+            self.append(hidden_layer)
 
-        self.input_shape = None # [20, 20, 3]  w x h x channels
-        self.output_shape = None # [2] one hot vector for classes
+        self.print_network()
 
-    def build_net(self, input):
-        raise Exception("Need to be implemented in subclass!")
-
-    def create_variable(self, name, shape):
-        return tf.get_variable(name, shape, initializer=tf.random_normal_initializer())
-
-    def add_layer(self, name, layer):
-        self.layers.append((name, layer))
-
-    def get_unique_name(self, prefix):
-        id = sum(t.startswith(prefix) for t, _ in self.layers) + 1
-        return '%s_%d' % (prefix, id)
-
-    def get_last_output(self):
-        return self.layers[-1][1]
-
-    def input(self, input):
-        self.add_layer("input", input)
-        return self
-
-    def conv(self, kx, ky, sx, sy, in_size, out_size, name=None):
-        name = name or self.get_unique_name("conv")
-
-        with tf.variable_scope(name) as scope:
-            input = self.get_last_output()
-            kernel = self.create_variable("weights", [kx, ky, in_size, out_size])
-            bias = self.create_variable("bias", [out_size])
-
-            conv = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(input, kernel, strides=[1, sx, sy, 1], padding='SAME'), bias),
-                              name=scope.name)
-            self.add_layer(name, conv)
+    def append(self, layer):
+        if self.layers:
+            layer.connect(self.layers)
+            self.layers = layer
+        else:
+            assert(layer.layer_type == "input")
+            self.input_layer = layer
+            self.layers = layer
 
         return self
 
-    def pool(self, kx, ky, sx=1, sy=1, name=None):
-        name = name or self.get_unique_name("pool")
+    def print_network(self):
+        def loop(layer):
+            print layer.name, layer.in_shape, "->", layer.out_shape
+            if layer.previous_layer:
+                loop(layer.previous_layer)
+        loop(self.layers)
 
-        input = self.get_last_output()
-        pool = tf.nn.max_pool(input, ksize=[1, kx, ky, 1], strides=[1, sx, sy, 1], padding='SAME')
-        self.add_layer(name, pool)
+    def add_input(self, training_set, test_set):
+        self.training_set = training_set
+        self.test_set = test_set
+        assert(training_set.input_shape == test_set.input_shape)
+        self.x = tf.placeholder(tf.types.float32, [None] + training_set.input_shape)
+        self.y = tf.placeholder(tf.types.float32, [None] + [training_set.num_labels])
+        self.append(InputLayer(self.x))
 
-        return self
 
-    def fc(self, in_size, out_size, name=None):
-        name = name or self.get_unique_name("fc")
+    def set_cost(self, logits_cost_function = tf.nn.softmax_cross_entropy_with_logits):
+        #Last Layer should be softmax_linear
+        assert(self.layers.layer_type == "softmax_linear")
+        self.cost = tf.reduce_mean(logits_cost_function(self.layers.output, self.y))
+        tf.scalar_summary("loss", self.cost)
 
-        with tf.variable_scope(name) as scope:
-            input = self.get_last_output()
-            weights = self.create_variable("weights", [in_size, out_size])
-            bias = self.create_variable("bias", [out_size])
+    def set_optimizer(self, learning_rate, optimizer = tf.train.AdamOptimizer):
+        self.optimizer = optimizer(learning_rate=learning_rate).minimize(self.cost)
 
-            input_flat = tf.reshape(input, [-1, weights.get_shape().as_list()[0]])
-            fc = tf.nn.relu(tf.matmul(input_flat, weights) + bias, name=scope.name)
+    def set_accuracy(self):
+        correct_pred = tf.equal(tf.argmax(self.layers.output, 1), tf.argmax(self.y, 1))
+        self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.types.float32))
+        tf.scalar_summary("accuracy", self.accuracy)
 
-            self.add_layer(name, fc)
+    def make_path(self, path):
+        if not os.path.isdir(path):
+            os.path.mkdir(path)
 
-        return self
+    def set_log_path(self, log_path):
+        self.log_path = log_path
+        self.make_path(log_path)
 
-    def softmax_linear(self, in_size, out_size, name=None):
-        name = name or self.get_unique_name("softmax_linear")
+    def set_snapshot_path(self, snapshot_path):
+        self.snapshot_path = snapshot_path
+        self.make_path(snapshot_path)
 
-        with tf.variable_scope(name) as scope:
-            input = self.get_last_output()
-            weights = self.create_variable("weights", [in_size, out_size])
-            bias = self.create_variable("bias", [out_size])
+    def run(batch_size, iterations, display_step = 100):
+        init = tf.initialize_all_variables()
+        self.merged_summary_op = tf.merge_all_summaries()
 
-            softmax_linear = tf.nn.xw_plus_b(input, weights, bias, name=scope.name)
+        with tf.Session() as sess:
+            self.saver = tf.train.Saver()
+            self.summary_writer = tf.train.SummaryWriter(self.log_path, sess.graph_def)
+            sess.run(init)
+            self.train(sess, batch_size, iterations, display_step)
+            self.evaluate(sess, batch_size)
 
-            self.add_layer(name, softmax_linear)
+    def train(self, sess, batch_size, iterations, display_step):
+            step = 0
+            while step < iterations:
+                batch_xs, batch_ys = self.training_set.next_batch(batch_size)
+                sess.run(self.optimizer, feed_dict={x: batch_xs, y: batch_ys})
 
-        return self
+                if step % display_step == 0:
+                    write_progress(self, sess, step, batch_size)
 
-    def lrn(self, name=None):
-        return self
+                step += 1
 
-    def dropout(self, dropout_rate, name=None):
-        name = name or self.get_unique_name("dropout")
+            print "Optimization Finished!"
 
-        input = self.get_last_output()
-        dropout = tf.nn.dropout(input, dropout_rate)
-        self.add_layer(name, dropout)
+    def write_progress(self, sess, step, batch_size):
+        batch_xs, batch_ys = self.test_set.next_batch(batch_size)
 
-        return self
+        summary_str, acc, loss = sess.run([self.merged_summary_op, self.accuracy, self.cost], feed_dict={x: batch_xs, y: batch_ys})
+        self.summary_writer.add_summary(summary_str, step)
+        if self.snapshot_path:
+            path = os.path.join(self.snapshot_path, self.name + ".tensormodel")
+            self.saver.save(sess, path, global_step=step)
+        print "Iter {0}, Loss= {1:.6f}, Training Accuracy= {2:.5f}".format(step, loss, acc)
 
-    def debug(self, name=None):
 
-        # Make sure we have all the right params for the network.
-        assert(self.input_shape)
-        assert(self.output_shape)
-
-        name = name or self.get_unique_name("debug")
-
-        input = self.get_last_output()
-        layer_name = filter(lambda (name, layer): layer == input, self.layers)[0][0]
-        print "{0} : {1}".format(layer_name, input.get_shape())
-
-        return self
+    def evaluate(self, sess, batch_size):
+        #Accuracy
+        batch_xs, batch_ys = self.test_set.next_batch(batch_size)
+        print "Accuracy:", sess.run(self.accuracy, feed_dict={x: batch_xs, y: batch_ys})

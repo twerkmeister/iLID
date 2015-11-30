@@ -1,16 +1,16 @@
 # Learning Parameters
-LEARNING_RATE : 0.001
+LEARNING_RATE : 0.0001
 BATCH_SIZE : 128
-TRAINING_ITERS : 100000
+TRAINING_ITERS : 2000000
 DISPLAY_STEP : 10
 
 # Network Data Parameters
-INPUT_SHAPE : [600, 39, 1] # Input Image shape
+INPUT_SHAPE : [39, 600, 1] # Input Image shape
 OUTPUT_SHAPE : [2] # Total classes as vector
 
 # Datasets
-TRAINING_DATA : "/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/train.csv"
-TEST_DATA : "/Users/therold/Google Drive/Uni/DeepAudio/Code/tensorflow/test.csv"
+TRAINING_DATA : "/home/vegeboy/workspace/uni/iLID-Data/output/train_shuffled.csv"
+TEST_DATA : "/home/vegeboy/workspace/uni/iLID-Data/output/test_shuffled.csv"
 
 # Logging
 LOG_PATH : "logs"
