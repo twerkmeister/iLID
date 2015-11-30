@@ -1,7 +1,7 @@
 import numpy as np
 import csv
-from scipy.ndimage import imread
 import sys
+from image import read_png
 from networkinput import NetworkInput
 
 class CSVInput(NetworkInput):
@@ -25,21 +25,13 @@ class CSVInput(NetworkInput):
         self.shuffled_images = None
         self.shuffled_labels = None
 
-    def read_png(self, file_path):
-        image = imread(file_path, mode=self.mode)
-        if self.mode == "L":
-            #Adding third dimension to fit channel structure
-            image = np.reshape(image, image.shape+(1,))
-        assert(len(image.shape) >= 3)
-        return image
-
     def get_shuffled_samples(self):
         perm = np.arange(self.sample_size)
         np.random.shuffle(perm)
         return self.images[perm], self.labels[perm]
 
     def _read(self, start, batch_size, image_paths, labels):
-        images_read = np.array([self.read_png(path) for path in image_paths[start:start+batch_size]])
+        images_read = np.array([read_png(path, self.mode) for path in image_paths[start:start+batch_size]])
         labels_read = np.array([self.create_label_vector(label) for label in labels[start:start+batch_size]])
         assert(list(images_read.shape[1:]) == self.input_shape)
         assert(labels_read.size == batch_size * self.num_labels)

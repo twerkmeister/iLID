@@ -3,23 +3,30 @@ import os
 from layer import *
 
 class Network(object):
-    def __init__(self, name, hidden_layers):
+    def __init__(self, name, input_shape, output_shape, hidden_layers):
         self.name = name
         self.layers = None
-        self.input_layer = None
-        self.x = None
-        self.y = None
+        self.input_shape = input_shape
+        self.output_shape = output_shape
+
+        self.initialize_input()
+        self.hidden_layers = hidden_layers
+
+        self.build()
+
         self.training_set = None
         self.test_set = None
         self.cost = None
         self.optimizer = None
         self.log_path = None
         self.snapshot_path = None
-        self.hidden_layers = hidden_layers
 
+    def initialize_input(self):
+        self.x = tf.placeholder(tf.types.float32, [None] + self.input_shape)
+        self.y = tf.placeholder(tf.types.float32, [None] + self.output_shape)
+        self.append(InputLayer(self.x))
+        
     def build(self):
-        if not self.input_layer:
-            raise Exception("Input needs to be added first")
         for hidden_layer in self.hidden_layers:
             self.append(hidden_layer)
 
@@ -39,20 +46,21 @@ class Network(object):
     def print_network(self):
         def loop(layer):
             if layer.layer_type == "input":
-                print layer.name, layer.out_shape.as_list()
+                print layer.name, layer.out_shape.as_list()[1:]
             else:
-                print layer.name, layer.in_shape.as_list(), "->", layer.out_shape.as_list()
+                print layer.name, layer.in_shape.as_list()[1:], "->", layer.out_shape.as_list()[1:]
                 loop(layer.previous_layer)
         loop(self.layers)
 
-    def add_input(self, training_set, test_set):
+    def add_training_input(self, training_set, test_set):
         self.training_set = training_set
         self.test_set = test_set
         assert(training_set.input_shape == test_set.input_shape)
-        self.x = tf.placeholder(tf.types.float32, [None] + training_set.input_shape)
-        self.y = tf.placeholder(tf.types.float32, [None] + [training_set.num_labels])
-        self.append(InputLayer(self.x))
+        assert(training_set.input_shape == self.input_shape)
+        assert([training_set.num_labels] == self.output_shape)
 
+    def add_prediction_input(self):
+        pass
 
     def set_cost(self, logits_cost_function = tf.nn.softmax_cross_entropy_with_logits):
         #Last Layer should be softmax_linear

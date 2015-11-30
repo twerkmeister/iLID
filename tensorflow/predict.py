@@ -2,7 +2,8 @@ import tensorflow as tf
 import numpy as np
 import yaml
 from scipy.ndimage import imread
-from vgg_m_net import VGG_M_2048_NET as Network
+from network.instances import berlin_net as net
+import networkinput
 
 config = yaml.load(file("config.yaml"))
 
@@ -11,11 +12,9 @@ def predict(image_path, model_path):
     # Create model
     x = tf.placeholder(tf.types.float32, [None] + config["INPUT_SHAPE"])
 
-    prediction_input = np.empty([1] + config["INPUT_SHAPE"])
-    prediction_input[0:] = imread(image_path, mode="RGB")
+    prediction_input = networkinput.read_png("image_path")
 
-    net = Network(x, config["OUTPUT_SHAPE"][0])
-    pred = tf.nn.softmax(net.get_last_output())
+    pred = tf.nn.softmax(net.layers.output)
 
     # Start Prediction
     with tf.Session() as sess:
