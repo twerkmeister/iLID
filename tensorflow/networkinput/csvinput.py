@@ -54,14 +54,14 @@ class CSVInput(NetworkInput):
 
     def next_batch(self, batch_size):
         def loop(batch_size, accumulated_images = None, accumulated_labels = None):
-            if self.batch_start + batch_size >= self.sample_size:
+            if self.batch_start + batch_size > self.sample_size:
                 remaining_batch_size = self.sample_size - self.batch_start
                 next_epoch_batch_size = batch_size - remaining_batch_size
                 images, labels = self._read_images_and_labels(self.batch_start, remaining_batch_size)
 
                 self.epochs_completed += 1
                 self.batch_start = 0
-                if accumulated_images:
+                if accumulated_images != None:
                     return loop(next_epoch_batch_size, 
                             np.append(accumulated_images, images, axis=0), 
                             np.append(accumulated_labels, labels, axis=0))
@@ -71,7 +71,7 @@ class CSVInput(NetworkInput):
             else:
                 images, labels = self._read_images_and_labels(self.batch_start, batch_size)
                 self.batch_start += batch_size
-                if accumulated_images:
+                if accumulated_images != None:
                     return np.append(accumulated_images, images, axis=0), np.append(accumulated_labels, labels, axis=0)
                 else:
                     return images, labels
