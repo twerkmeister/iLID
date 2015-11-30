@@ -18,8 +18,8 @@ berlin_net = NetworkX("Berlin",
                        SoftmaxLinearLayer(2)])
 
 
-training_set = input_csv.CSVInput(config['TRAINING_DATA'], config['INPUT_SHAPE'], config['OUTPUT_SHAPE'][0])
-test_set = input_csv.CSVInput(config['TEST_DATA'], config['INPUT_SHAPE'], config['OUTPUT_SHAPE'][0])
+training_set = input_csv.CSVInput(config['TRAINING_DATA'], config['INPUT_SHAPE'], config['OUTPUT_SHAPE'][0], mode="L")
+test_set = input_csv.CSVInput(config['TEST_DATA'], config['INPUT_SHAPE'], config['OUTPUT_SHAPE'][0], mode="L")
 
 berlin_net.add_input(training_set, test_set)
 berlin_net.build()
@@ -29,5 +29,5 @@ berlin_net.set_accuracy()
 berlin_net.set_log_path(config['LOG_PATH'])
 berlin_net.set_snapshot_path(config['SNAPSHOT_PATH'])
 
-berlin_net.run(config['BATCH_SIZE'], config['TRAINING_ITERS'])
+berlin_net.run(config['BATCH_SIZE'], config['TRAINING_ITERS'], config['DISPLAY_STEP'])
 

@@ -13,8 +13,8 @@ class NetworkX(object):
         self.test_set = None
         self.cost = None
         self.optimizer = None
-        self.set_log_path = None
-        self.set_snapshot_path = None
+        self.log_path = None
+        self.snapshot_path = None
         self.hidden_layers = hidden_layers
 
     def build(self):
@@ -38,8 +38,10 @@ class NetworkX(object):
 
     def print_network(self):
         def loop(layer):
-            print layer.name, layer.in_shape, "->", layer.out_shape
-            if layer.previous_layer:
+            if layer.layer_type == "input":
+                print layer.name, layer.out_shape.as_list()
+            else:
+                print layer.name, layer.in_shape.as_list(), "->", layer.out_shape.as_list()
                 loop(layer.previous_layer)
         loop(self.layers)
 
@@ -78,7 +80,7 @@ class NetworkX(object):
         self.snapshot_path = snapshot_path
         self.make_path(snapshot_path)
 
-    def run(batch_size, iterations, display_step = 100):
+    def run(self, batch_size, iterations, display_step = 100):
         init = tf.initialize_all_variables()
         self.merged_summary_op = tf.merge_all_summaries()
 
@@ -93,10 +95,10 @@ class NetworkX(object):
             step = 0
             while step < iterations:
                 batch_xs, batch_ys = self.training_set.next_batch(batch_size)
-                sess.run(self.optimizer, feed_dict={x: batch_xs, y: batch_ys})
+                sess.run(self.optimizer, feed_dict={self.x: batch_xs, self.y: batch_ys})
 
                 if step % display_step == 0:
-                    write_progress(self, sess, step, batch_size)
+                    self.write_progress(sess, step, batch_size)
 
                 step += 1
 
@@ -105,7 +107,7 @@ class NetworkX(object):
     def write_progress(self, sess, step, batch_size):
         batch_xs, batch_ys = self.test_set.next_batch(batch_size)
 
-        summary_str, acc, loss = sess.run([self.merged_summary_op, self.accuracy, self.cost], feed_dict={x: batch_xs, y: batch_ys})
+        summary_str, acc, loss = sess.run([self.merged_summary_op, self.accuracy, self.cost], feed_dict={self.x: batch_xs, self.y: batch_ys})
         self.summary_writer.add_summary(summary_str, step)
         if self.snapshot_path:
             path = os.path.join(self.snapshot_path, self.name + ".tensormodel")
@@ -116,4 +118,4 @@ class NetworkX(object):
     def evaluate(self, sess, batch_size):
         #Accuracy
         batch_xs, batch_ys = self.test_set.next_batch(batch_size)
-        print "Accuracy:", sess.run(self.accuracy, feed_dict={x: batch_xs, y: batch_ys})
+        print "Accuracy:", sess.run(self.accuracy, feed_dict={self.x: batch_xs, self.y: batch_ys})
