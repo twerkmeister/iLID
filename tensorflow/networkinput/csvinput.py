@@ -33,6 +33,8 @@ class CSVInput(NetworkInput):
     def _read(self, start, batch_size, image_paths, labels):
         images_read = np.array([read_png(path, self.mode) for path in image_paths[start:start+batch_size]])
         labels_read = np.array([self.create_label_vector(label) for label in labels[start:start+batch_size]])
+        print self.path, start, batch_size
+        print self.path, list(images_read.shape[1:]), self.input_shape
         assert(list(images_read.shape[1:]) == self.input_shape)
         assert(labels_read.size == batch_size * self.num_labels)
         return images_read, labels_read
@@ -41,7 +43,7 @@ class CSVInput(NetworkInput):
         return self._read(start, batch_size, self.images, self.labels)
         
     def _read_random(self, start, batch_size):
-        if start == 0 or not self.shuffled_images or not self.shuffled_labels:
+        if start == 0 or self.shuffled_images == None or self.shuffled_labels == None:
             self.shuffled_images, self.shuffled_labels = self.get_shuffled_samples()
 
         return self._read(start, batch_size, self.shuffled_images, self.shuffled_labels)
@@ -54,6 +56,10 @@ class CSVInput(NetworkInput):
 
     def next_batch(self, batch_size):
         def loop(batch_size, accumulated_images = None, accumulated_labels = None):
+            if self.batch_start == self.sample_size:
+                self.batch_start = 0
+                self.epochs_completed += 1
+
             if self.batch_start + batch_size > self.sample_size:
                 remaining_batch_size = self.sample_size - self.batch_start
                 next_epoch_batch_size = batch_size - remaining_batch_size
