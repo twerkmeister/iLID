@@ -33,8 +33,6 @@ class CSVInput(NetworkInput):
     def _read(self, start, batch_size, image_paths, labels):
         images_read = np.array([read_png(path, self.mode) for path in image_paths[start:start+batch_size]])
         labels_read = np.array([self.create_label_vector(label) for label in labels[start:start+batch_size]])
-        print self.path, start, batch_size
-        print self.path, list(images_read.shape[1:]), self.input_shape
         assert(list(images_read.shape[1:]) == self.input_shape)
         assert(labels_read.size == batch_size * self.num_labels)
         return images_read, labels_read
