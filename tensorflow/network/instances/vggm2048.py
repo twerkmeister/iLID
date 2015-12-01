@@ -1,4 +1,5 @@
 from network import *
+import tensorflow as tf
 
 labels = 2
 vgg_m_2048 = Network("VGG_M_2048",
@@ -17,4 +18,4 @@ vgg_m_2048 = Network("VGG_M_2048",
                      FullyConnectedLayer(2048),
                      DropoutLayer(0.5),
                      FullyConnectedLayer(2048),
-                     SoftmaxLinearLayer(labels)])
+                     FullyConnectedLayer(labels, activation_function=tf.identity)])
