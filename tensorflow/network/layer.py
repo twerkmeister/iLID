@@ -128,20 +128,3 @@ class DropoutLayer(HiddenLayer):
 
     def _output(self):
         return tf.nn.dropout(self.input, self.dropout_rate)
-
-class SoftmaxLinearLayer(HiddenLayer):
-    layer_type = "softmax_linear"
-
-    def __init__(self, out_size):
-        super(SoftmaxLinearLayer, self).__init__()
-        self.out_size = out_size
-
-    def _output(self):
-        with tf.variable_scope(self.name) as scope:
-            in_size, input_flat = self.flatten_input()
-
-            weights = self.create_weights("weights", [in_size, self.out_size])
-            bias = self.create_bias("bias", [self.out_size])
-
-            return tf.nn.xw_plus_b(self.input, weights, bias, name=scope.name)
-            

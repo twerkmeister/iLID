@@ -1,4 +1,5 @@
 from network import *
+import tensorflow as tf
 
 labels = 2
 berlin_net = Network("Berlin",
@@ -11,4 +12,4 @@ berlin_net = Network("Berlin",
                        ConvolutionLayer(6, 6, 1, 1, 12),
                        PoolingLayer(2, 2, 2, 2),
                        FullyConnectedLayer(1024),
-                       SoftmaxLinearLayer(labels)])
+                       FullyConnectedLayer(labels, activation_function=tf.identity)])

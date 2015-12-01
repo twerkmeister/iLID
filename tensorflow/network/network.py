@@ -61,7 +61,7 @@ class Network(object):
 
     def set_cost(self, logits_cost_function = tf.nn.softmax_cross_entropy_with_logits):
         #Last Layer should be softmax_linear
-        assert(self.layers.layer_type == "softmax_linear")
+        #assert(self.layers.layer_type == "softmax_linear")
         self.cost = tf.reduce_mean(logits_cost_function(self.layers.output, self.y))
         tf.scalar_summary("loss", self.cost)
 
