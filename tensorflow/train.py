@@ -9,7 +9,7 @@ test_set = networkinput.CSVInput(config['TEST_DATA'], config['INPUT_SHAPE'], con
 
 berlin_net.set_training_input(training_set, test_set)
 berlin_net.set_cost()
-berlin_net.set_optimizer(config['LEARNING_RATE'])
+berlin_net.set_optimizer(config['LEARNING_RATE'], config['LEARNING_DECAY_STEP'])
 berlin_net.set_accuracy()
 berlin_net.set_log_path(config['LOG_PATH'])
 berlin_net.set_snapshot_path(config['SNAPSHOT_PATH'])

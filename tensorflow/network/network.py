@@ -67,8 +67,11 @@ class Network(object):
         self.cost = tf.reduce_mean(logits_cost_function(self.layers.output, self.y))
         tf.scalar_summary("loss", self.cost)
 
-    def set_optimizer(self, learning_rate, optimizer = tf.train.AdamOptimizer):
-        self.optimizer = optimizer(learning_rate=learning_rate).minimize(self.cost)
+    def set_optimizer(self, learning_rate, decay_steps, optimizer = tf.train.AdamOptimizer):
+        global_step = tf.Variable(0, trainable=False)
+        lr = tf.train.exponential_decay(learning_rate, global_step, decay_steps, 0.96, staircase=True)
+        tf.scalar_summary("learning_rate", lr)
+        self.optimizer = optimizer(learning_rate=lr).minimize(self.cost, global_step = global_step)
 
     def set_accuracy(self):
         correct_pred = tf.equal(tf.argmax(self.layers.output, 1), tf.argmax(self.y, 1))
@@ -81,7 +84,6 @@ class Network(object):
 
     def make_path_name(self, path):
         return os.path.join(os.getcwd(), path, "{0}_{1}".format(self.name, self.created_at))
-
 
     def set_log_path(self, log_path):
         self.log_path = self.make_path_name(log_path)
