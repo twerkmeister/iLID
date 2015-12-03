@@ -32,6 +32,7 @@ class Network(object):
         for hidden_layer in self.hidden_layers:
             self.append(hidden_layer)
 
+        self.set_activation_summary()
         self.print_network()
 
     def append(self, layer):
@@ -53,6 +54,13 @@ class Network(object):
                 print layer.name, layer.in_shape.as_list()[1:], "->", layer.out_shape.as_list()[1:]
                 loop(layer.previous_layer)
         loop(self.layers)
+
+    def set_activation_summary(self):
+        '''Log each layers activations and sparsity.'''
+        for layer in self.hidden_layers:
+            tf.histogram_summary(layer.name + '/activations', layer.output)
+            tf.scalar_summary(layer.name + '/sparsity', tf.nn.zero_fraction(layer.output))
+
 
     def set_training_input(self, training_set, test_set):
         self.training_set = training_set
