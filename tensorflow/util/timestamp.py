@@ -8,4 +8,4 @@ def current_timestamp():
     return timestamp(current_time_in_seconds())
 
 def timestamp(ts):
-    return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%dT%H:%M:%S')
+    return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%dT%H-%M-%S')

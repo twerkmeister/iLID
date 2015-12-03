@@ -77,11 +77,10 @@ class Network(object):
 
     def make_path(self, path):
         if not os.path.isdir(path):
-            os.mkdir(path)
+            os.makedirs(path)
 
     def make_path_name(self, path):
-        path = path.rstrip("/")
-        return "{0}_{1}_{2}".format(path, self.name, self.created_at)
+        return os.path.join(os.getcwd(), path, "{0}_{1}".format(self.name, self.created_at))
 
 
     def set_log_path(self, log_path):
