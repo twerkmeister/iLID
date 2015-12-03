@@ -27,7 +27,7 @@ class Network(object):
         self.x = tf.placeholder(tf.types.float32, [None] + self.input_shape)
         self.y = tf.placeholder(tf.types.float32, [None] + self.output_shape)
         self.append(InputLayer(self.x))
-        
+
     def build(self):
         for hidden_layer in self.hidden_layers:
             self.append(hidden_layer)
@@ -97,8 +97,8 @@ class Network(object):
             pred = tf.nn.softmax(self.layers.output)
             saver = tf.train.Saver()
             saver.restore(sess, model_path)
-            prediction = sess.run(pred, feed_dict={self.x: images})
-            label = tf.argmax(prediction, dimension=1)
+            label_op = tf.argmax(pred, dimension=1)
+            prediction, label = sess.run([pred, label_op], feed_dict={self.x: images})
             print "Probabilities: ", prediction
             print "Label: ", label
             print prediction.shape
