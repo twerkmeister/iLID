@@ -129,6 +129,7 @@ class Network(object):
             step = 0
             while step < iterations:
                 batch_xs, batch_ys = self.training_set.next_batch(batch_size)
+                tf.image_summary("Input Images", batch_xs, max_images=1000)
                 sess.run(self.optimizer, feed_dict={self.x: batch_xs, self.y: batch_ys})
 
                 if step % display_step == 0:
@@ -141,7 +142,7 @@ class Network(object):
     def write_progress(self, sess, step, batch_size):
         # batch_xs, batch_ys = self.test_set.next_batch(batch_size)
         batch_xs, batch_ys = self.test_set.read_all()
-        print "calculating stats on {} samples".format(batch_xs.shape[0])
+        print "calculating stats on {0} samples".format(batch_xs.shape[0])
         summary_str, acc, loss = sess.run([self.merged_summary_op, self.accuracy, self.cost], feed_dict={self.x: batch_xs, self.y: batch_ys})
         self.summary_writer.add_summary(summary_str, step)
         if self.snapshot_path:
