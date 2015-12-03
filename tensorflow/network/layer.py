@@ -38,7 +38,7 @@ class InputLayer(Layer):
         self.input_placeholder = input_placeholder
         super(InputLayer, self).__init__()
         self.connect(None)
-    
+
     def _output(self):
         return self.input_placeholder
 
@@ -69,14 +69,14 @@ class PoolingLayer(HiddenLayer):
         self.pooling_function = pooling_function
 
     def _output(self):
-        return self.pooling_function(self.input, 
-                              ksize=[1, self.kx, self.ky, 1], 
-                              strides=[1, self.sx, self.sy, 1], 
+        return self.pooling_function(self.input,
+                              ksize=[1, self.kx, self.ky, 1],
+                              strides=[1, self.sx, self.sy, 1],
                               padding=self.padding)
 
 class ConvolutionLayer(HiddenLayer):
     layer_type="conv"
-    
+
     def __init__(self, kx, ky, sx, sy, out_channels, padding="SAME", activation_function = tf.nn.relu):
         super(ConvolutionLayer, self).__init__()
         self.kx = kx
@@ -90,15 +90,15 @@ class ConvolutionLayer(HiddenLayer):
     def _output(self):
         with tf.variable_scope(self.name) as scope:
             in_channels = self.in_shape[3].value
-            
+
             kernel = self.create_weights("weights", [self.kx, self.ky, in_channels, self.out_channels])
             bias = self.create_bias("bias", [self.out_channels])
 
             return self.activation_function(
                      tf.nn.bias_add(
-                        tf.nn.conv2d(self.input, 
-                                     kernel, 
-                                     strides=[1, self.sx, self.sy, 1], 
+                        tf.nn.conv2d(self.input,
+                                     kernel,
+                                     strides=[1, self.sx, self.sy, 1],
                                      padding='SAME'),
                         bias),
                     name=scope.name)
@@ -116,7 +116,7 @@ class FullyConnectedLayer(HiddenLayer):
             in_size, input_flat = self.flatten_input()
             weights = self.create_weights("weights", [in_size, self.out_size])
             bias = self.create_bias("bias", [self.out_size])
-            
+
             return self.activation_function(tf.matmul(input_flat, weights) + bias, name=scope.name)
 
 class DropoutLayer(HiddenLayer):
@@ -128,3 +128,17 @@ class DropoutLayer(HiddenLayer):
 
     def _output(self):
         return tf.nn.dropout(self.input, self.dropout_rate)
+
+class LocalResponseNormalizationLayer(HiddenLayer):
+    layer_type = "lrn"
+
+    def __init__(self, depth_radius = 5, bias=1.0, alpha = 0.0005, beta = 0.75 ):
+        super(LocalResponseNormalizationLayer, self).__init__()
+        self.depth_radius = depth_radius
+        self.bias = bias
+        self.alpha = alpha
+        self.beta = beta
+
+    def _output(self):
+        return tf.nn.lrn(self.input, self.depth_radius, bias=self.bias, alpha=self.alpha, beta=self.beta)
+
