@@ -123,21 +123,22 @@ class Network(object):
             self.summary_writer = tf.train.SummaryWriter(self.log_path, sess.graph_def)
             sess.run(init)
             self.optimize(sess, batch_size, iterations, display_step)
-            self.evaluate(sess, batch_size)
+            self.evaluate(sess)
 
     def optimize(self, sess, batch_size, iterations, display_step):
-            step = 0
-            while step < iterations:
-                batch_xs, batch_ys = self.training_set.next_batch(batch_size)
-                tf.image_summary("Input Images", batch_xs, max_images=1000)
-                sess.run(self.optimizer, feed_dict={self.x: batch_xs, self.y: batch_ys})
+        step = 0
+        while step < iterations:
+            batch_xs, batch_ys = self.training_set.next_batch(batch_size)
+            tf.image_summary("Input Images", batch_xs, max_images=1000)
+            sess.run(self.optimizer, feed_dict={self.x: batch_xs, self.y: batch_ys})
 
-                if step % display_step == 0:
-                    self.write_progress(sess, step, batch_size)
+            if step % display_step == 0:
+                self.write_progress(sess, step, batch_size)
 
-                step += 1
+            step += 1
 
-            print "Optimization Finished!"
+        print "Optimization Finished!"
+
 
     def write_progress(self, sess, step, batch_size):
         # batch_xs, batch_ys = self.test_set.next_batch(batch_size)
