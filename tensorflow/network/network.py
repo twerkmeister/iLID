@@ -1,6 +1,7 @@
 import tensorflow as tf
 import os
 from layer import *
+import util.timestamp
 
 class Network(object):
     def __init__(self, name, input_shape, output_shape, hidden_layers):
@@ -8,6 +9,7 @@ class Network(object):
         self.layers = None
         self.input_shape = input_shape
         self.output_shape = output_shape
+        self.created_at = util.timestamp.current_timestamp()
 
         self.initialize_input()
         self.hidden_layers = hidden_layers
@@ -77,13 +79,18 @@ class Network(object):
         if not os.path.isdir(path):
             os.mkdir(path)
 
+    def make_path_name(self, path):
+        path = path.rstrip("/")
+        return "{0}_{1}_{2}".format(path, self.name, self.created_at)
+
+
     def set_log_path(self, log_path):
-        self.log_path = log_path
-        self.make_path(log_path)
+        self.log_path = self.make_path_name(log_path)
+        self.make_path(self.log_path)
 
     def set_snapshot_path(self, snapshot_path):
-        self.snapshot_path = snapshot_path
-        self.make_path(snapshot_path)
+        self.snapshot_path = self.make_path_name(snapshot_path)
+        self.make_path(self.snapshot_path)
 
     def predict(self, model_path, images):
         with tf.Session() as sess:
@@ -123,8 +130,9 @@ class Network(object):
             print "Optimization Finished!"
 
     def write_progress(self, sess, step, batch_size):
-        batch_xs, batch_ys = self.test_set.next_batch(batch_size)
-
+        # batch_xs, batch_ys = self.test_set.next_batch(batch_size)
+        batch_xs, batch_ys = self.test_set.read_all()
+        print "calculating stats on {} samples".format(batch_xs.shape[0])
         summary_str, acc, loss = sess.run([self.merged_summary_op, self.accuracy, self.cost], feed_dict={self.x: batch_xs, self.y: batch_ys})
         self.summary_writer.add_summary(summary_str, step)
         if self.snapshot_path:
@@ -133,7 +141,7 @@ class Network(object):
         print "Iter {0}, Loss= {1:.6f}, Training Accuracy= {2:.5f}".format(step, loss, acc)
 
 
-    def evaluate(self, sess, batch_size):
+    def evaluate(self, sess):
         #Accuracy
-        batch_xs, batch_ys = self.test_set.next_batch(batch_size)
-        print "Accuracy:", sess.run(self.accuracy, feed_dict={self.x: batch_xs, self.y: batch_ys})
+        batch.xs, batch.ys = self.test_set.read_all()
+        print "Accuracy:", sess.run(eval_correct, feed_dict={self.x: batch_xs, self.y: batch_ys})

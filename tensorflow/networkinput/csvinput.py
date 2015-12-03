@@ -52,6 +52,9 @@ class CSVInput(NetworkInput):
         else:
             return self._read_ordered(self.batch_start, batch_size)
 
+    def read_all(self):
+        return self.next_batch(self.sample_size)
+
     def next_batch(self, batch_size):
         def loop(batch_size, accumulated_images = None, accumulated_labels = None):
             if self.batch_start == self.sample_size:
