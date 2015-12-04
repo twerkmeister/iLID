@@ -133,7 +133,7 @@ class Network(object):
             sess.run(self.optimizer, feed_dict={self.x: batch_xs, self.y: batch_ys})
 
             if step % display_step == 0:
-                self.write_progress(sess, step, batch_size)
+                self.write_progress(sess, step, batch_size*8)
 
             step += 1
 
@@ -142,7 +142,7 @@ class Network(object):
 
     def write_progress(self, sess, step, batch_size):
         # batch_xs, batch_ys = self.test_set.next_batch(batch_size)
-        batch_xs, batch_ys = self.test_set.read_all()
+        batch_xs, batch_ys = self.test_set.next_batch(batch_size)
         print "calculating stats on {0} samples".format(batch_xs.shape[0])
         summary_str, acc, loss = sess.run([self.merged_summary_op, self.accuracy, self.cost], feed_dict={self.x: batch_xs, self.y: batch_ys})
         self.summary_writer.add_summary(summary_str, step)
@@ -152,7 +152,22 @@ class Network(object):
         print "Iter {0}, Loss= {1:.6f}, Training Accuracy= {2:.5f}".format(step, loss, acc)
 
 
-    def evaluate(self, sess):
-        #Accuracy
-        batch.xs, batch.ys = self.test_set.read_all()
-        print "Accuracy:", sess.run(eval_correct, feed_dict={self.x: batch_xs, self.y: batch_ys})
+    def evaluate(self, sess, batch_size=128):
+        #Precision
+        top_k_op = tf.nn.in_top_k(self.layers.output, tf.to_int32(tf.argmax(self.y, dimension=1)), 1)
+        step = 0
+        true_count = 0
+        while step * batch_size < self.test_set.sample_size:
+            batch_xs, batch_ys = self.test_set.next_batch(batch_size)
+            predictions = sess.run(top_k_op, feed_dict={self.x: batch_xs, self.y: batch_ys})
+            true_count += np.sum([predictions])
+            step += 1
+        precision = true_count / float(self.test_set.sample_size)
+        print 'precision @ 1 = %.3f' % precision
+
+    def load_and_evaluate(self, model_path):
+        with tf.Session() as sess:
+            saver = tf.train.Saver()
+            saver.restore(sess, model_path)
+            self.evaluate(sess)
+        
