@@ -129,7 +129,7 @@ class Network(object):
         step = 0
         while step < iterations:
             batch_xs, batch_ys = self.training_set.next_batch(batch_size)
-            tf.image_summary("Input Images", batch_xs, max_images=50)
+            #tf.image_summary("Input Images", batch_xs, max_images=50)
             sess.run(self.optimizer, feed_dict={self.x: batch_xs, self.y: batch_ys})
 
             if step % display_step == 0:
