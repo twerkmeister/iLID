@@ -51,7 +51,7 @@ def pad_window(window, windowsize):
   return window
 
 def sliding(image, windowsize, stride, cutoff = 0.0):
-  """creates an generator of sliding window along the width of an image; padding too short windows
+  """creates an generator of sliding window along the width of an image
 
   Args:
       image (2 or 3 dimensional numpy array): the image the sliding windows are created for
@@ -64,9 +64,29 @@ def sliding(image, windowsize, stride, cutoff = 0.0):
   """
   for window in generate_windows(image, windowsize, stride):
     if _width(window) >= windowsize * cutoff:
-      yield pad_window(window, windowsize)
+      yield window
     else:
       continue
+
+def sliding_with_filenames(filename, image, windowsize, stride, cutoff= 0.0):
+  """Same as sliding, but adding the window number to the filename per window
+
+  Args:
+      filename (string): name of the file being processed
+      image (2 or 3 dimensional numpy array): the image the sliding windows are created for
+      windowsize (int): width of the sliding window
+      stride (int): stepsize of the sliding
+      cutoff (float): drop windows with width below windowsize * cutoff 
+
+  Returns:
+      generator for the sliding windows and their filenames
+  """
+  i = 0
+  for window in sliding(image, windowsize, stride, cutoff):
+    counter = "_%02d" % i 
+    window_filename = "".join([filename, counter])
+    yield window_filename, window
+    i += 1
 
 
 def _height(img): return img.shape[0] 

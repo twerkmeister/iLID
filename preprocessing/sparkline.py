@@ -14,16 +14,20 @@ def apply_melfilter(f, samplerate, signal):
   return (f, filterbank_energies)
 
 def main(args):
+  window_size = 600
   files = filecollector.collect(args.input_path)
 
   sc = SparkContext("local", "sparkline")
   pipeline = (
-    sc.parallelize(files)
+    sc.parallelize(files, 4)
     .map(lambda f: read_wav(f))
+    .map(lambda (f, samplerate_and_signal): (filename.truncate_extension(f), samplerate_and_signal))
     .map(lambda (f, samplerate_and_signal): apply_melfilter(f, samplerate_and_signal[0], samplerate_and_signal[1]))
     .map(lambda (f, filterbank_energies): (f, graphic.colormapping.to_grayscale(filterbank_energies, bytes=True)))
-    .map(lambda (f, image): (f, list(graphic.windowing.sliding(image, 600, 600, 0.6))))
-    .map(lambda (f, images): output.image.save(f, images, args.output_path))
+    .flatMap(lambda (f, image): list(graphic.windowing.sliding_with_filenames(f, image, window_size, window_size, 0.6)))
+    .map(lambda (f, image): (f, graphic.histeq.histeq(image)))
+    .map(lambda (f, image): (f, graphic.windowing.pad_window(image, window_size)))
+    .map(lambda (f, image): output.image.save(f, image, args.output_path))
   )
   
   pipeline.collect()
