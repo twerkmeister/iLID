@@ -39,7 +39,7 @@ def pad_window(window, windowsize):
   if has_channels:
     window_channels = window.shape[2]
 
-  if _width(window) != windowsize:
+  if _width(window) < windowsize:
     missing_window_width = windowsize - _width(window)
     padding = None
     if has_channels:

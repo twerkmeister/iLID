@@ -1,3 +1,4 @@
-__all__ = ["melfilterbank"]
+__all__ = ["melfilterbank", "windowing"]
 
 import melfilterbank
+import windowing
