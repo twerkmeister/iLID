@@ -3,7 +3,7 @@ import subprocess
 from audio_length import escape_characters
 import argparse
 
-filetypes_to_convert=[".mp3",".wav"]
+filetypes_to_convert=[".mp3",".m4a", "webm"]
 
 def convert(filename):
   filename_extensionless, extension = os.path.splitext(filename)
