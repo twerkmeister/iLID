@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import yaml
 from scipy.ndimage import imread
-from network.instances.berlinnet import berlin_net
+from network.instances.berlinnet import net
 import networkinput
 import argparse
 
@@ -10,7 +10,7 @@ config = yaml.load(file("config.yaml"))
 
 def predict(image_path, model_path):
     image = networkinput.read_png(image_path, "L")
-    berlin_net.predict(model_path, np.expand_dims(image, axis=0))
+    net.predict(model_path, np.expand_dims(image, axis=0))
 
 if __name__ == "__main__":  
 

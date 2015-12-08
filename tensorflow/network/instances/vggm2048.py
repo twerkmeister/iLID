@@ -2,7 +2,7 @@ from network import *
 import tensorflow as tf
 
 labels = 2
-vgg_m_2048 = Network("VGG_M_2048",
+net = Network("VGG_M_2048",
                     [224, 224, 3],
                     [labels],
                     [ConvolutionLayer(7, 7, 2, 2, 96),

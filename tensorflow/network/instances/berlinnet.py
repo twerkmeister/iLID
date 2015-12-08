@@ -2,7 +2,7 @@ from network import *
 import tensorflow as tf
 
 labels = 2
-berlin_net = Network("Berlin",
+net = Network("Berlin",
                       [39, 600, 1],
                       [labels],
                       [ConvolutionLayer(6, 6, 1, 1, 12),

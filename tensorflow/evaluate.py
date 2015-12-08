@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import yaml
 from scipy.ndimage import imread
-from network.instances.berlinnet import berlin_net
+from network.instances.berlinnet_unnormal import net
 import networkinput
 import argparse
 
@@ -12,8 +12,8 @@ def evaluate(model_path):
     training_set = networkinput.CSVInput(config['TRAINING_DATA'], config['INPUT_SHAPE'], config['OUTPUT_SHAPE'][0], mode="L")
     test_set = networkinput.CSVInput(config['TEST_DATA'], config['INPUT_SHAPE'], config['OUTPUT_SHAPE'][0], mode="L")
 
-    berlin_net.set_training_input(training_set, test_set)
-    berlin_net.load_and_evaluate(model_path)
+    net.set_training_input(training_set, test_set)
+    net.load_and_evaluate(model_path)
 
 if __name__ == "__main__":  
 
