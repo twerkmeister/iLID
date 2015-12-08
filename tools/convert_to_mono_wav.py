@@ -17,7 +17,7 @@ def walk_path(path):
   for root, dirs, files in os.walk(path):
     for sound_file in files:
       _, extension = os.path.splitext(sound_file)
-      print sound_file
+      #print sound_file
       if extension in filetypes_to_convert:
         yield os.path.join(root, sound_file)
       else:
