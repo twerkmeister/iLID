@@ -8,19 +8,17 @@ import sys
 
 def read_wav(f):
   samplerate, signal = wav.read(f)
-  if len(signal.shape) > 1:
-    signal = signal[:,0]
+  #if len(signal.shape) > 1:
+  #  signal = signal[:,0]
   return (f, signal, samplerate)
 
 def apply_melfilter(f, signal, samplerate):
   filterbank_energies = audio.melfilterbank.logfilter(samplerate, signal, winlen=0.00833, winstep=0.00833, nfilt=39, lowfreq=0, preemph=1.0)
-  print filterbank_energies.shape
+  #print f, samplerate, filterbank_energies.shape
   return (f, filterbank_energies)
 
 def sliding_audio(f, signal, samplerate):
   for window_name, window in audio.windowing.sliding_with_filename(f, signal, samplerate, 5, 5, 0.6):
-    print window.shape
-    print window.shape[0] / float(samplerate)
     yield (window_name, window, samplerate)
 
 def main(args):
@@ -37,7 +35,7 @@ def main(args):
     .map(lambda (f, filterbank_energies): (f, graphic.colormapping.to_grayscale(filterbank_energies, bytes=True)))
     #.flatMap(lambda (f, image): list(graphic.windowing.sliding_with_filenames(f, image, window_size, window_size, 0.6)))
     .map(lambda (f, image): (f, graphic.histeq.histeq(image)))
-    .map(lambda (f, image): (f, graphic.windowing.pad_window(image, window_size)))
+    .map(lambda (f, image): (f, graphic.windowing.cut_or_pad_window(image, window_size)))
     .map(lambda (f, image): output.image.save(f, image, args.output_path))
   )
   

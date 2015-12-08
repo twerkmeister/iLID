@@ -34,6 +34,8 @@ def pad_window(window, windowsize):
       padded window (2 or 3 dimension numpy array)
 
   """
+  assert _width(window) <= windowsize
+
   has_channels = len(window.shape) > 2
   window_channels = None
   if has_channels:
@@ -49,6 +51,14 @@ def pad_window(window, windowsize):
     window = np.append(window, padding, axis=1)
 
   return window
+
+def cut_or_pad_window(window, windowsize):
+  if _width(window) > windowsize:
+    # cut
+    assert _width(window) / float(windowsize) < 1.1 # we don't want huge cuts, just cutting some irregularities
+    return window[:,:windowsize]
+  else:
+    return pad_window(window, windowsize)
 
 def sliding(image, windowsize, stride, cutoff = 0.0):
   """creates an generator of sliding window along the width of an image
@@ -81,12 +91,10 @@ def sliding_with_filenames(filename, image, windowsize, stride, cutoff= 0.0):
   Returns:
       generator for the sliding windows and their filenames
   """
-  i = 0
-  for window in sliding(image, windowsize, stride, cutoff):
+  for i,window in enumerate(sliding(image, windowsize, stride, cutoff)):
     counter = "_%02d" % i 
     window_filename = "".join([filename, counter])
     yield window_filename, window
-    i += 1
 
 
 def _height(img): return img.shape[0] 
