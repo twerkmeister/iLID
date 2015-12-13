@@ -26,7 +26,8 @@ class Network(object):
     def initialize_input(self):
         self.x = tf.placeholder(tf.types.float32, [None] + self.input_shape)
         self.y = tf.placeholder(tf.types.float32, [None] + self.output_shape)
-        self.append(InputLayer(self.x))
+        self.input_layer = InputLayer(self.x)
+        self.append(self.input_layer)
 
     def build(self):
         for hidden_layer in self.hidden_layers:
@@ -57,6 +58,8 @@ class Network(object):
 
     def set_activation_summary(self):
         '''Log each layers activations and sparsity.'''
+        tf.image_summary("input images", self.input_layer.output, max_images=100)
+
         for layer in self.hidden_layers:
             tf.histogram_summary(layer.name + '/activations', layer.output)
             tf.scalar_summary(layer.name + '/sparsity', tf.nn.zero_fraction(layer.output))
@@ -70,10 +73,14 @@ class Network(object):
         assert([training_set.num_labels] == self.output_shape)
 
     def set_cost(self, logits_cost_function = tf.nn.softmax_cross_entropy_with_logits):
-        #Last Layer should be softmax_linear
-        #assert(self.layers.layer_type == "softmax_linear")
-        self.cost = tf.reduce_mean(logits_cost_function(self.layers.output, self.y))
+        cross_entropy_mean = tf.reduce_mean(logits_cost_function(self.layers.output, self.y))
+        tf.add_to_collection('losses', cross_entropy_mean)
+
+        # The total loss is defined as the cross entropy loss plus all of the weight
+        # decay terms (L2 loss).
+        self.cost = tf.add_n(tf.get_collection('losses'), name='total_loss')
         tf.scalar_summary("loss", self.cost)
+
 
     def set_optimizer(self, learning_rate, decay_steps, optimizer = tf.train.AdamOptimizer):
         global_step = tf.Variable(0, trainable=False)
@@ -129,7 +136,6 @@ class Network(object):
         step = 0
         while step < iterations:
             batch_xs, batch_ys = self.training_set.next_batch(batch_size)
-            #tf.image_summary("Input Images", batch_xs, max_images=50)
             sess.run(self.optimizer, feed_dict={self.x: batch_xs, self.y: batch_ys})
 
             if step % display_step == 0:
@@ -139,6 +145,7 @@ class Network(object):
 
         print "Optimization Finished!"
 
+        self.write_progress(sess, step, batch_size)
 
     def write_progress(self, sess, step, batch_size):
         # batch_xs, batch_ys = self.test_set.next_batch(batch_size)
@@ -170,4 +177,4 @@ class Network(object):
             saver = tf.train.Saver()
             saver.restore(sess, model_path)
             self.evaluate(sess)
-        
+
