@@ -86,7 +86,7 @@ class Network(object):
 
     def set_optimizer(self, learning_rate, decay_steps, optimizer = tf.train.AdamOptimizer):
         global_step = tf.Variable(0, trainable=False)
-        lr = tf.train.exponential_decay(learning_rate, global_step, decay_steps, 0.96, staircase=True)
+        lr = tf.train.exponential_decay(learning_rate, global_step, decay_steps, 0.1, staircase=True)
         tf.scalar_summary("learning_rate", lr)
         self.optimizer = optimizer(learning_rate=lr).minimize(self.cost, global_step = global_step)
 
@@ -134,7 +134,8 @@ class Network(object):
             self.summary_writer = tf.train.SummaryWriter(self.log_path, sess.graph_def)
             sess.run(init)
             self.optimize(sess, batch_size, iterations, display_step)
-            self.evaluate(sess)
+            return self.evaluate(sess)
+
 
     def optimize(self, sess, batch_size, iterations, display_step):
         step = 0
@@ -175,6 +176,8 @@ class Network(object):
             step += 1
         precision = true_count / float(self.test_set.sample_size)
         print 'precision @ 1 = %.3f' % precision
+
+        return precision
 
     def load_and_evaluate(self, model_path):
         with tf.Session() as sess:
