@@ -33,7 +33,6 @@ class Network(object):
         for hidden_layer in self.hidden_layers:
             self.append(hidden_layer)
 
-        self.set_activation_summary()
         self.print_network()
 
     def append(self, layer):
@@ -59,6 +58,9 @@ class Network(object):
     def set_activation_summary(self):
         '''Log each layers activations and sparsity.'''
         tf.image_summary("input images", self.input_layer.output, max_images=100)
+
+        for var in tf.trainable_variables():
+            tf.histogram_summary(var.op.name, var)
 
         for layer in self.hidden_layers:
             tf.histogram_summary(layer.name + '/activations', layer.output)
@@ -122,6 +124,8 @@ class Network(object):
         return prediction, label
 
     def train(self, batch_size, iterations, display_step = 100):
+        self.set_activation_summary()
+
         init = tf.initialize_all_variables()
         self.merged_summary_op = tf.merge_all_summaries()
 
