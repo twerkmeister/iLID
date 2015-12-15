@@ -32,18 +32,15 @@ class Network(object):
         for hidden_layer in self.hidden_layers:
             self.append(hidden_layer)
 
-        self.set_activation_summary()
         self.print_network()
 
     def append(self, layer):
         if self.layers:
             layer.connect(self.layers)
-            self.layers = layer
         else:
             assert(layer.layer_type == "input")
             self.input_layer = layer
-            self.layers = layer
-
+        self.layers = layer
         return self
 
     def print_network(self):
@@ -57,6 +54,11 @@ class Network(object):
 
     def set_activation_summary(self):
         '''Log each layers activations and sparsity.'''
+        tf.image_summary("input images", self.input_layer.output, max_images=100)
+
+        for var in tf.trainable_variables():
+            tf.histogram_summary(var.op.name, var)
+
         for layer in self.hidden_layers:
             tf.histogram_summary(layer.name + '/activations', layer.output)
             tf.scalar_summary(layer.name + '/sparsity', tf.nn.zero_fraction(layer.output))
@@ -70,14 +72,18 @@ class Network(object):
         assert([training_set.num_labels] == self.output_shape)
 
     def set_cost(self, logits_cost_function = tf.nn.softmax_cross_entropy_with_logits):
-        #Last Layer should be softmax_linear
-        #assert(self.layers.layer_type == "softmax_linear")
-        self.cost = tf.reduce_mean(logits_cost_function(self.layers.output, self.y))
+        cross_entropy_mean = tf.reduce_mean(logits_cost_function(self.layers.output, self.y))
+        tf.add_to_collection('losses', cross_entropy_mean)
+
+        # The total loss is defined as the cross entropy loss plus all of the weight
+        # decay terms (L2 loss).
+        self.cost = tf.add_n(tf.get_collection('losses'), name='total_loss')
         tf.scalar_summary("loss", self.cost)
+
 
     def set_optimizer(self, learning_rate, decay_steps, optimizer = tf.train.AdamOptimizer):
         global_step = tf.Variable(0, trainable=False)
-        lr = tf.train.exponential_decay(learning_rate, global_step, decay_steps, 0.96, staircase=True)
+        lr = tf.train.exponential_decay(learning_rate, global_step, decay_steps, 0.1, staircase=True)
         tf.scalar_summary("learning_rate", lr)
         self.optimizer = optimizer(learning_rate=lr).minimize(self.cost, global_step = global_step)
 
@@ -115,6 +121,8 @@ class Network(object):
         return prediction, label
 
     def train(self, batch_size, iterations, display_step = 100):
+        self.set_activation_summary()
+
         init = tf.initialize_all_variables()
         self.merged_summary_op = tf.merge_all_summaries()
 
@@ -123,13 +131,13 @@ class Network(object):
             self.summary_writer = tf.train.SummaryWriter(self.log_path, sess.graph_def)
             sess.run(init)
             self.optimize(sess, batch_size, iterations, display_step)
-            self.evaluate(sess)
+            return self.evaluate(sess)
+
 
     def optimize(self, sess, batch_size, iterations, display_step):
         step = 0
         while step < iterations:
             batch_xs, batch_ys = self.training_set.next_batch(batch_size)
-            #tf.image_summary("Input Images", batch_xs, max_images=50)
             sess.run(self.optimizer, feed_dict={self.x: batch_xs, self.y: batch_ys})
 
             if step % display_step == 0:
@@ -139,6 +147,7 @@ class Network(object):
 
         print "Optimization Finished!"
 
+        self.write_progress(sess, step, batch_size)
 
     def write_progress(self, sess, step, batch_size):
         # batch_xs, batch_ys = self.test_set.next_batch(batch_size)
@@ -165,9 +174,11 @@ class Network(object):
         precision = true_count / float(self.test_set.sample_size)
         print 'precision @ 1 = %.3f' % precision
 
+        return precision
+
     def load_and_evaluate(self, model_path):
         with tf.Session() as sess:
             saver = tf.train.Saver()
             saver.restore(sess, model_path)
             self.evaluate(sess)
-        
+

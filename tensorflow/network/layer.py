@@ -117,7 +117,7 @@ class FullyConnectedLayer(HiddenLayer):
             weights = self.create_weights("weights", [in_size, self.out_size])
             bias = self.create_bias("bias", [self.out_size])
 
-            return self.activation_function(tf.matmul(input_flat, weights) + bias, name=scope.name)
+            return self.activation_function(tf.nn.xw_plus_b(input_flat, weights, bias, name=scope.name))
 
 class DropoutLayer(HiddenLayer):
     layer_type = "dropout"
