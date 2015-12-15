@@ -24,8 +24,8 @@ class Network(object):
         self.snapshot_path = None
 
     def initialize_input(self):
-        self.x = tf.placeholder(tf.types.float32, [None] + self.input_shape)
-        self.y = tf.placeholder(tf.types.float32, [None] + self.output_shape)
+        self.x = tf.placeholder(tf.float32, [None] + self.input_shape)
+        self.y = tf.placeholder(tf.float32, [None] + self.output_shape)
         self.append(InputLayer(self.x))
 
     def build(self):
@@ -83,7 +83,7 @@ class Network(object):
 
     def set_accuracy(self):
         correct_pred = tf.equal(tf.argmax(self.layers.output, 1), tf.argmax(self.y, 1))
-        self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.types.float32))
+        self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
         tf.scalar_summary("accuracy", self.accuracy)
 
     def make_path(self, path):
