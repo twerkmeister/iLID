@@ -1,18 +1,30 @@
 import yaml
+import argparse
+import importlib
 import networkinput
-from network.instances.berlinnet import net
+from util.email_notification import send_email_notification
 
-config = yaml.load(file("config.yaml"))
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--config", default="config.yaml", help="Path to config file")
+args = parser.parse_args()
 
-training_set = networkinput.CSVInput(config['TRAINING_DATA'], config['INPUT_SHAPE'], config['OUTPUT_SHAPE'][0], mode="L")
-test_set = networkinput.CSVInput(config['TEST_DATA'], config['INPUT_SHAPE'], config['OUTPUT_SHAPE'][0], mode="L")
+config = yaml.load(file(args.config))
+
+network_module = "network.instances.{0}".format(config["NET"])
+net = importlib.import_module("network.instances.berlinnet").net
+
+training_set = networkinput.CSVInput(config["TRAINING_DATA"], config["INPUT_SHAPE"], config["OUTPUT_SHAPE"][0], mode="L")
+test_set = networkinput.CSVInput(config["TEST_DATA"], config["INPUT_SHAPE"], config["OUTPUT_SHAPE"][0], mode="L")
 
 net.set_training_input(training_set, test_set)
 net.set_cost()
-net.set_optimizer(config['LEARNING_RATE'], config['LEARNING_DECAY_STEP'])
+net.set_optimizer(config["LEARNING_RATE"], config["LEARNING_DECAY_STEP"])
 net.set_accuracy()
-net.set_log_path(config['LOG_PATH'])
-net.set_snapshot_path(config['SNAPSHOT_PATH'])
+net.set_log_path(config["LOG_PATH"])
+net.set_snapshot_path(config["SNAPSHOT_PATH"])
 
-net.train(config['BATCH_SIZE'], config['TRAINING_ITERS'], config['DISPLAY_STEP'])
+precision = net.train(config["BATCH_SIZE"], config["TRAINING_ITERS"], config["DISPLAY_STEP"])
+
+if config["ENABLE_EMAIL_NOTIFICATION"]:
+  send_email_notification(precision)
 
