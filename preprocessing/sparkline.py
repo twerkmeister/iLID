@@ -18,7 +18,7 @@ def apply_melfilter(f, signal, samplerate):
   return (f, filterbank_energies)
 
 def generate_spectrograms(f, signal, samplerate):
-  Sxx = audio.spectrogram.spectrogram_cutoff(samplerate, signal)
+  Sxx = audio.spectrogram.spectrogram_cutoff(samplerate, signal, winlen=0.01, winstep=0.033)
   return (f, Sxx)
 
 def sliding_audio(f, signal, samplerate):
