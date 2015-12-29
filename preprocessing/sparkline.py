@@ -17,6 +17,10 @@ def apply_melfilter(f, signal, samplerate):
   #print f, samplerate, filterbank_energies.shape
   return (f, filterbank_energies)
 
+def generate_spectrograms(f, signal, samplerate):
+  Sxx = audio.spectrogram.spectrogram_cutoff(samplerate, signal)
+  return (f, Sxx)
+
 def sliding_audio(f, signal, samplerate):
   for window_name, window in audio.windowing.sliding_with_filename(f, signal, samplerate, 5, 5, 0.6):
     yield (window_name, window, samplerate)
@@ -31,8 +35,9 @@ def main(args):
     .map(lambda f: read_wav(f))
     .map(lambda (f, signal, samplerate): (filename.truncate_extension(f), signal, samplerate))
     .flatMap(lambda (f, signal, samplerate): sliding_audio(f, signal, samplerate))
-    .map(lambda (f, signal, samplerate): apply_melfilter(f, signal, samplerate))
-    .map(lambda (f, filterbank_energies): (f, graphic.colormapping.to_grayscale(filterbank_energies, bytes=True)))
+    .map(lambda (f, signal, samplerate): generate_spectrograms(f, signal, samplerate))
+    #.map(lambda (f, signal, samplerate): apply_melfilter(f, signal, samplerate))
+    .map(lambda (f, image): (f, graphic.colormapping.to_grayscale(image, bytes=True)))
     #.flatMap(lambda (f, image): list(graphic.windowing.sliding_with_filenames(f, image, window_size, window_size, 0.6)))
     .map(lambda (f, image): (f, graphic.histeq.histeq(image)))
     .map(lambda (f, image): (f, graphic.windowing.cut_or_pad_window(image, window_size)))
