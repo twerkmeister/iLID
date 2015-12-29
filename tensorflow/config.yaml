@@ -6,6 +6,7 @@ TRAINING_ITERS : 2000000
 DISPLAY_STEP : 10
 
 # Network Data Parameters
+NET : "berlinnet" # name of the Python file with the network specification
 INPUT_SHAPE : [39, 600, 1] # Input Image shape
 OUTPUT_SHAPE : [2] # Total classes as vector
 
@@ -16,3 +17,4 @@ TEST_DATA : "/home/vegeboy/workspace/uni/iLID-Data/output/test_shuffled.csv"
 # Logging
 LOG_PATH : "logs"
 SNAPSHOT_PATH : "snapshots"
+ENABLE_EMAIL_NOTIFICATION : True
