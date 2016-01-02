@@ -27,6 +27,3 @@ class WindowingTest(unittest.TestCase):
     expected_number_of_windows = int(math.ceil(image.shape[1] / float(stride)))
 
     self.assertEqual(expected_number_of_windows, len(list(windowing.sliding(image, windowsize, stride))))
-
-  
-        
