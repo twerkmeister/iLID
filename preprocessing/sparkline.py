@@ -11,7 +11,7 @@ def read_wav(f):
   samplerate, signal = wav.read(f)
   #if len(signal.shape) > 1:
   #  signal = signal[:,0]
-  return (f, signal, samplerate)
+  return (filename.clean(f), signal, samplerate)
 
 def apply_melfilter(f, signal, samplerate):
   filterbank_energies = audio.melfilterbank.logfilter(samplerate, signal, winlen=0.00833, winstep=0.00833, nfilt=39, lowfreq=0, preemph=1.0)
