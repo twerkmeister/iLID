@@ -20,14 +20,12 @@ class NetworkInput(object):
         return v
 
     def next_batch_cached(self, batch_size):
-        print batch_size
         if self.cache_iterator == 0:
             self.cache = self.next_batch(batch_size * self.cache_factor)
         
         result_images = self.cache[0][self.cache_iterator * batch_size : (self.cache_iterator+1) * batch_size]
         result_labels = self.cache[1][self.cache_iterator * batch_size : (self.cache_iterator+1) * batch_size]
         self.cache_iterator = (self.cache_iterator + 1) % self.cache_factor
-        print result_images.shape
         return result_images, result_labels
 
 
