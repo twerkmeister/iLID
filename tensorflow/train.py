@@ -11,7 +11,7 @@ args = parser.parse_args()
 config = yaml.load(file(args.config))
 
 network_module = "network.instances.{0}".format(config["NET"])
-network_generator = importlib.import_module(network_module).generate
+network_generator = getattr(importlib.import_module(network_module), "generate")
 
 net = network_generator(config["INPUT_SHAPE"], config["OUTPUT_SHAPE"][0])
 
