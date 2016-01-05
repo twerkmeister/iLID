@@ -131,7 +131,7 @@ class Network(object):
             self.summary_writer = tf.train.SummaryWriter(self.log_path, sess.graph_def)
             sess.run(init)
             self.optimize(sess, batch_size, iterations, display_step)
-            return self.evaluate(sess)
+            return self.evaluate(sess, batch_size)
 
 
     def optimize(self, sess, batch_size, iterations, display_step):
@@ -161,7 +161,7 @@ class Network(object):
         print "Iter {0}, Loss= {1:.6f}, Training Accuracy= {2:.5f}".format(step, loss, acc)
 
 
-    def evaluate(self, sess, batch_size=128):
+    def evaluate(self, sess, batch_size):
         #Precision
         top_k_op = tf.nn.in_top_k(self.layers.output, tf.to_int32(tf.argmax(self.y, dimension=1)), 1)
         step = 0
