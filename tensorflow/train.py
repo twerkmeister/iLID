@@ -11,7 +11,9 @@ args = parser.parse_args()
 config = yaml.load(file(args.config))
 
 network_module = "network.instances.{0}".format(config["NET"])
-net = importlib.import_module(network_module).net
+network_generator = importlib.import_module(network_module).generate
+
+net = network_generator(config["INPUT_SHAPE"], config["OUTPUT_SHAPE"][0])
 
 training_set = networkinput.CSVInput(config["TRAINING_DATA"], config["INPUT_SHAPE"], config["OUTPUT_SHAPE"][0], mode="L")
 test_set = networkinput.CSVInput(config["TEST_DATA"], config["INPUT_SHAPE"], config["OUTPUT_SHAPE"][0], mode="L")
