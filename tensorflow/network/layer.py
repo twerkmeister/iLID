@@ -44,14 +44,16 @@ class InputLayer(Layer):
 
 
 class HiddenLayer(Layer):
-    def __init__(self):
+    def __init__(self, weights_initializer = None, bias_initializer = None):
         super(HiddenLayer, self).__init__()
+        self.weights_initializer = weights_initializer if weights_initializer else tf.truncated_normal_initializer(stddev=1e-4)
+        self.bias_initializer = bias_initializer if bias_initializer else tf.constant_initializer(0.1)
 
-    def create_weights(self, name, shape, initializer=tf.random_normal_initializer()):
-        return tf.get_variable(name, shape, initializer=initializer)
+    def create_weights(self, name, shape):
+        return tf.get_variable(name, shape, initializer=self.weights_initializer)
 
-    def create_bias(self, name, shape, initializer=tf.constant_initializer(0.1)):
-        return self.create_weights(name, shape, initializer)
+    def create_bias(self, name, shape):
+        return tf.get_variable(name, shape, initializer=self.bias_initializer)
 
     def flatten_input(self):
         in_size = np.prod(self.in_shape.as_list()[1:])
@@ -77,8 +79,8 @@ class PoolingLayer(HiddenLayer):
 class ConvolutionLayer(HiddenLayer):
     layer_type="conv"
 
-    def __init__(self, kx, ky, sx, sy, out_channels, padding="SAME", activation_function = tf.nn.relu):
-        super(ConvolutionLayer, self).__init__()
+    def __init__(self, kx, ky, sx, sy, out_channels, padding="SAME", activation_function = tf.nn.relu, weights_initializer = None, bias_initializer = None):
+        super(ConvolutionLayer, self).__init__(weights_initializer, bias_initializer)
         self.kx = kx
         self.ky = ky
         self.sx = sx
@@ -106,8 +108,8 @@ class ConvolutionLayer(HiddenLayer):
 class FullyConnectedLayer(HiddenLayer):
     layer_type = "fc"
 
-    def __init__(self, out_size, activation_function = tf.nn.relu):
-        super(FullyConnectedLayer, self).__init__()
+    def __init__(self, out_size, activation_function = tf.nn.relu, weights_initializer = None, bias_initializer = None):
+        super(FullyConnectedLayer, self).__init__(weights_initializer, bias_initializer)
         self.out_size = out_size
         self.activation_function = activation_function
 
