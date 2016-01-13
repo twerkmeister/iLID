@@ -1,7 +1,7 @@
 logs/
 dist/
 snapshots/
-
+**/neg23/
 *.caffemodel
 *.solverstate
 *.tlog
