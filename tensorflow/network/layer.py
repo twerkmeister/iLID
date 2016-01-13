@@ -46,7 +46,7 @@ class InputLayer(Layer):
 class HiddenLayer(Layer):
     def __init__(self, weights_initializer = None, bias_initializer = None):
         super(HiddenLayer, self).__init__()
-        self.weights_initializer = weights_initializer if weights_initializer else tf.truncated_normal_initializer(stddev=1e-4)
+        self.weights_initializer = weights_initializer if weights_initializer else tf.truncated_normal_initializer(stddev=1e-2)
         self.bias_initializer = bias_initializer if bias_initializer else tf.constant_initializer(0.1)
 
     def create_weights(self, name, shape):
