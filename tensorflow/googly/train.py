@@ -39,10 +39,10 @@ import deepaudio as experiment
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_train',
+tf.app.flags.DEFINE_string('train_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_train_5',
                            """Directory where to write event logs """
                            """and checkpoint.""")
-tf.app.flags.DEFINE_integer('max_steps', 10000,
+tf.app.flags.DEFINE_integer('max_steps', 2500,
                             """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False,
                             """Whether to log device placement.""")
@@ -60,8 +60,15 @@ def train():
     # inference model.
     logits = experiment.inference(images)
 
+    pred = tf.nn.softmax(logits)
+
+    dense_labels = experiment.labels_to_dense(labels)
+
+    # Calculate accuracy
+    accuracy, english_accuracy, german_accuracy, german_predictions_count, sum_english_samples, sum_german_samples = experiment.accuracy(logits, dense_labels)
+
     # Calculate loss.
-    loss = experiment.loss(logits, labels)
+    loss = experiment.loss(logits, dense_labels)
 
     # Build a Graph that trains the model with one batch of examples and
     # updates the model parameters.
@@ -89,7 +96,7 @@ def train():
 
     for step in xrange(FLAGS.max_steps):
       start_time = time.time()
-      _, loss_value = sess.run([train_op, loss])
+      _, pred_value, loss_value, accuracy_value, english_accuracy_value, german_accuracy_value, german_predictions_count_value, sum_english, sum_german = sess.run([train_op, pred, loss, accuracy, english_accuracy, german_accuracy, german_predictions_count, sum_english_samples, sum_german_samples])
       duration = time.time() - start_time
 
       assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
@@ -99,10 +106,11 @@ def train():
         examples_per_sec = num_examples_per_step / duration
         sec_per_batch = float(duration)
 
-        format_str = ('%s: step %d, loss = %.2f (%.1f examples/sec; %.3f '
-                      'sec/batch)')
-        print (format_str % (datetime.now(), step, loss_value,
+        format_str = ('%s: step %d, loss = %.2f, accuracy = %.2f, english_accuracy = %.2f, seen_english = %d, german_accuracy = %.2f, seen_german = %d, german_predictions_count = %d '
+                      '(%.1f examples/sec; %.3f sec/batch)')
+        print (format_str % (datetime.now(), step, loss_value, accuracy_value, english_accuracy_value, sum_english, german_accuracy_value, sum_german, german_predictions_count_value,
                              examples_per_sec, sec_per_batch))
+        print (pred_value)
 
       if step % 100 == 0:
         summary_str = sess.run(summary_op)

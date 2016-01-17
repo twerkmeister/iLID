@@ -42,7 +42,7 @@ TRAIN_DATA_BATCHES = 4
 TEST_DATA_BATCHES = 1
 # Global constants for our dataset
 # TODO
-NUM_CLASSES = 4
+NUM_CLASSES = 2
 # TODO
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 36194
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 5998
@@ -230,7 +230,7 @@ def inputs(eval_data, data_dir, batch_size):
   filename_queue = tf.train.string_input_producer(filenames)
 
   # Read examples from files in the filename queue.
-  read_input = read_cifar10(filename_queue)
+  read_input = read(filename_queue)
   reshaped_image = tf.cast(read_input.uint8image, tf.float32)
 
   height = IMAGE_HEIGHT
