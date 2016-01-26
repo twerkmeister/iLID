@@ -26,6 +26,7 @@ from __future__ import print_function
 from datetime import datetime
 import math
 import time
+from scipy import misc
 
 import tensorflow.python.platform
 from tensorflow.python.platform import gfile
@@ -36,18 +37,37 @@ import deepaudio as experiment
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('eval_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_eval_3',
+tf.app.flags.DEFINE_string('eval_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_eval_7_x',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'test' or 'train_eval'.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_train',
+tf.app.flags.DEFINE_string('checkpoint_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_train_7',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
                             """How often to run the eval.""")
-tf.app.flags.DEFINE_integer('num_examples', 5000,
+tf.app.flags.DEFINE_integer('num_examples', 3000,
                             """Number of examples to run.""")
 tf.app.flags.DEFINE_boolean('run_once', True,
                          """Whether to run eval only once.""")
+
+def kernel_summary(sess):
+  with sess.as_default():
+    for layer in ["conv1", "conv2", "conv3"]:
+      with tf.variable_scope(layer, reuse=True):
+        weights = tf.get_variable('weights')
+      kernels = tf.unpack(tf.transpose(weights, perm=[3,2,0,1]))
+      for i,kernel in enumerate(kernels):
+      #[12, 6, 6] -> 12 x [8, 8]
+        padding = [[1,1], [1,1]]
+        padded_kernels = [tf.pad(single_kernel, padding) for single_kernel in tf.unpack(kernel)]
+
+      #12 x [8, 8] -> [6, 12 * 8]
+        horizontally_concatenated = tf.concat(1, padded_kernels)
+
+        image = horizontally_concatenated.eval()
+
+        misc.imsave(layer + "_" + str(i) + ".png", image)
+
 
 
 def eval_once(saver, summary_writer, top_k_op, summary_op):
@@ -97,6 +117,8 @@ def eval_once(saver, summary_writer, top_k_op, summary_op):
       summary.ParseFromString(sess.run(summary_op))
       summary.value.add(tag='Precision @ 1', simple_value=precision)
       summary_writer.add_summary(summary, global_step)
+
+      kernel_summary(sess)
     except Exception as e:  # pylint: disable=broad-except
       coord.request_stop(e)
 
@@ -109,7 +131,7 @@ def evaluate():
   with tf.Graph().as_default():
     # Get images and labels for 10.
     eval_data = FLAGS.eval_data == 'test'
-    images, labels = experiment.inputs(eval_data=eval_data)
+    images, labels, keys = experiment.inputs(eval_data=eval_data)
 
     # Build a Graph that computes the logits predictions from the
     # inference model.

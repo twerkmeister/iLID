@@ -38,14 +38,14 @@ IMAGE_HEIGHT = 39
 IMAGE_DEPTH = 1
 
 #TODO
-TRAIN_DATA_BATCHES = 4
+TRAIN_DATA_BATCHES = 6
 TEST_DATA_BATCHES = 1
 # Global constants for our dataset
 # TODO
 NUM_CLASSES = 2
 # TODO
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 36194
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 5998
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 59996
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 11999
 
 
 def read(filename_queue):
@@ -110,7 +110,7 @@ def read(filename_queue):
   return result
 
 
-def _generate_image_and_label_batch(image, label, min_queue_examples,
+def _generate_image_and_label_batch(image, label, key, min_queue_examples,
                                     batch_size):
   """Construct a queued batch of images and labels.
 
@@ -128,8 +128,8 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
   # Create a queue that shuffles the examples, and then
   # read 'batch_size' images + labels from the example queue.
   num_preprocess_threads = 16
-  images, label_batch = tf.train.shuffle_batch(
-      [image, label],
+  images, label_batch, key_batch = tf.train.shuffle_batch(
+      [image, label, key],
       batch_size=batch_size,
       num_threads=num_preprocess_threads,
       capacity=min_queue_examples + 3 * batch_size,
@@ -138,7 +138,7 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
   # Display the training images in the visualizer.
   tf.image_summary('images', images)
 
-  return images, tf.reshape(label_batch, [batch_size])
+  return images, tf.reshape(label_batch, [batch_size]), tf.reshape(key_batch, [batch_size])
 
 
 def distorted_inputs(data_dir, batch_size):
@@ -197,7 +197,7 @@ def distorted_inputs(data_dir, batch_size):
          'This will take a few minutes.' % min_queue_examples)
 
   # Generate a batch of images and labels by building up a queue of examples.
-  return _generate_image_and_label_batch(float_image, read_input.label,
+  return _generate_image_and_label_batch(float_image, read_input.label, read_input.key,
                                          min_queue_examples, batch_size)
 
 
@@ -251,5 +251,5 @@ def inputs(eval_data, data_dir, batch_size):
                            min_fraction_of_examples_in_queue)
 
   # Generate a batch of images and labels by building up a queue of examples.
-  return _generate_image_and_label_batch(float_image, read_input.label,
+  return _generate_image_and_label_batch(float_image, read_input.label, read_input.key,
                                          min_queue_examples, batch_size)

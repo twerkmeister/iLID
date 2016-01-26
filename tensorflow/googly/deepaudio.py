@@ -56,7 +56,7 @@ FLAGS = tf.app.flags.FLAGS
 # Basic model parameters.
 tf.app.flags.DEFINE_integer('batch_size', 32,
                             """Number of images to process in a batch.""")
-tf.app.flags.DEFINE_string('data_dir', '/home/vegeboy/workspace/uni/iLID-Data/output',
+tf.app.flags.DEFINE_string('data_dir', '/home/vegeboy/workspace/uni/iLID-Data/output/dubsmash',
                            """Path to the data directory.""")
 
 # Global constants describing the CIFAR-10 data set.
@@ -69,9 +69,42 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = image_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
 # Constants describing the training process.
 MOVING_AVERAGE_DECAY = 0.9999     # The decay to use for the moving average.
-NUM_EPOCHS_PER_DECAY = 350.0      # Epochs after which learning rate decays.
+NUM_EPOCHS_PER_DECAY = 5.0      # Epochs after which learning rate decays.
 LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
 INITIAL_LEARNING_RATE = 0.1       # Initial learning rate.
+
+def __kernel_summary(conv_weights):
+  filter_height, filter_width, in_channels, out_channels = conv_weights.get_shape().as_list()
+  kernels = tf.transpose(conv_weights, perm=[3,0,1,2])
+  #first_input_layer_per_kernel = tf.slice(kernels, [0,0,0,0], [out_channels, filter_height, filter_width, 1])
+
+  padding = [[0,0], [1,1], [1,1], [0,0]]
+  first_input_layer_per_kernel = tf.pad(kernels, padding)
+
+  n = int()
+  print(first_input_layer_per_kernel.get_shape().as_list())
+
+def _kernel_summary(conv_weights, sess):
+  """Helper to create image summaries for convolutional kernels
+
+  Creates an image summary of a convolutional kernel
+
+  Args:
+    kernel: Variable
+  Returns:
+    nothing
+  """
+  #[6,6,12,12] -> [12,12,6,6] -> 12 x [12,6,6]
+  kernels = tf.unpack(tf.transpose(conv_weights, perm=[3,2,0,1]))
+  for i,kernel in enumerate(kernels):
+    #[12, 6, 6] -> 12 x [8, 8]
+    padding = [[1,1], [1,1]]
+    padded_kernels = [tf.pad(single_kernel, padding) for single_erknel in tf.unpack(kernel)]
+
+    #12 x [8, 8] -> [6, 12 * 8]
+    horizontally_concatenated = tf.concat(1, single_layer_kernels)
+
+
 
 
 def _activation_summary(x):
@@ -173,36 +206,34 @@ def inference(images):
   Returns:
     Logits.
   """
-  # We instantiate all variables using tf.get_variable() instead of
-  # tf.Variable() in order to share variables across multiple GPU training runs.
-  # If we only ran this model on a single GPU, we could simplify this function
-  # by replacing all instances of tf.get_variable() with tf.Variable().
-  #
+
   # conv1
   with tf.variable_scope('conv1') as scope:
     kernel = _variable_with_weight_decay('weights', shape=[6, 6, 1, 12],
-                                         stddev=1e-4, wd=0.0)
+                                         stddev=1e-3, wd=0.0)
     conv = tf.nn.conv2d(images, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable('biases', [12], tf.constant_initializer(0.0))
     bias = tf.nn.bias_add(conv, biases)
     conv1 = tf.nn.relu(bias, name=scope.name)
+    #__kernel_summary(kernel)
     _activation_summary(conv1)
   print("conv1:", conv1.get_shape())
-  # pool1
-  pool1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1],
-                         padding='SAME', name='pool1')
   # norm1
-  norm1 = tf.nn.lrn(pool1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75,
+  norm1 = tf.nn.lrn(conv1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75,
                     name='norm1')
+  # pool1
+  pool1 = tf.nn.max_pool(norm1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1],
+                         padding='SAME', name='pool1')
 
   # conv2
   with tf.variable_scope('conv2') as scope:
     kernel = _variable_with_weight_decay('weights', shape=[6, 6, 12, 12],
-                                         stddev=1e-4, wd=0.0)
-    conv = tf.nn.conv2d(norm1, kernel, [1, 1, 1, 1], padding='SAME')
+                                         stddev=1e-3, wd=0.0)
+    conv = tf.nn.conv2d(pool1, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable('biases', [12], tf.constant_initializer(0.1))
     bias = tf.nn.bias_add(conv, biases)
     conv2 = tf.nn.relu(bias, name=scope.name)
+    #__kernel_summary(kernel)
     _activation_summary(conv2)
 
   # norm2
@@ -215,11 +246,12 @@ def inference(images):
   # conf 3
   with tf.variable_scope('conv3') as scope:
     kernel = _variable_with_weight_decay('weights', shape=[6, 6, 12, 12],
-                                         stddev=1e-4, wd=0.0)
+                                         stddev=1e-3, wd=0.0)
     conv = tf.nn.conv2d(pool2, kernel, [1, 1, 1, 1], padding='SAME')
     biases = _variable('biases', [12], tf.constant_initializer(0.1))
     bias = tf.nn.bias_add(conv, biases)
     conv3 = tf.nn.relu(bias, name=scope.name)
+    #__kernel_summary(kernel)
     _activation_summary(conv3)
 
   # norm3
@@ -293,7 +325,7 @@ def loss(logits, dense_labels):
 
   # The total loss is defined as the cross entropy loss plus all of the weight
   # decay terms (L2 loss).
-  return tf.add_n(tf.get_collection('losses'), name='total_loss')
+  return tf.add_n(tf.get_collection('losses'), name='total_loss'), cross_entropy
 
 
 def _add_loss_summaries(total_loss):
@@ -332,12 +364,12 @@ def accuracy(logits, dense_labels):
 
   german_samples = tf.equal(tf.constant(1, dtype="int64"), tf.argmax(dense_labels, 1))
   german_accuracy = tf.reduce_mean(tf.cast(tf.gather(correct_pred, tf.where(german_samples)), tf.float32))
-  sum_german_samples = seen_german.assign_add(tf.reduce_sum(tf.cast(tf.gather(correct_pred, tf.where(german_samples)), tf.int32)))
+  sum_german_samples = seen_german.assign_add(tf.reduce_sum(tf.cast(tf.gather(dense_labels, tf.where(german_samples)), tf.int32)))
   tf.scalar_summary("german_accuracy", german_accuracy)
 
   english_samples = tf.equal(tf.constant(0, dtype="int64"), tf.argmax(dense_labels, 1))
   english_accuracy = tf.reduce_mean(tf.cast(tf.gather(correct_pred, tf.where(english_samples)), tf.float32))
-  sum_english_samples = seen_english.assign_add(tf.reduce_sum(tf.cast(tf.gather(correct_pred, tf.where(english_samples)), tf.int32)))
+  sum_english_samples = seen_english.assign_add(tf.reduce_sum(tf.cast(tf.gather(dense_labels, tf.where(english_samples)), tf.int32)))
   tf.scalar_summary("english_accuracy", english_accuracy)
 
   german_predictions = tf.equal(tf.constant(1, dtype="int64"), tf.argmax(x, 1))
