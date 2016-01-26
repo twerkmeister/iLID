@@ -49,7 +49,7 @@ import tensorflow.python.platform
 from six.moves import urllib
 import tensorflow as tf
 
-import mel_spectrogram_input as image_input
+import image_input
 
 FLAGS = tf.app.flags.FLAGS
 
