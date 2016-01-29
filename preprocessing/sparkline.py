@@ -46,10 +46,11 @@ def main(args):
     #.map(lambda (f, signal, samplerate): apply_melfilter(f, signal, samplerate))
     .map(lambda (f, image): (f, graphic.colormapping.to_grayscale(image, bytes=True)))
     .map(lambda (f, image): (f, graphic.histeq.histeq(image)))
+    .map(lambda (f, image): (f, graphic.histeq.clamp_and_equalize(image)))
     .map(lambda (f, image): (f, graphic.windowing.cut_or_pad_window(image, window_size)))
     .map(lambda (f, image): output.image.save(f, image, args.output_path))
   )
-  
+
   pipeline.collect()
 
 
