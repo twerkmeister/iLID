@@ -17,7 +17,7 @@ def clamp_and_equalize(image):
    # Similar to Levels Filter in Photoshop etc
 
    min_val = 100 # clamp ca. 40% of black values
-   max_val = image.max()
+   max_val = 255 # image.max()
 
    LUT = np.zeros((256,)) # Look up table
 
