@@ -137,7 +137,7 @@ class Network(object):
     def optimize(self, sess, batch_size, iterations, display_step):
         step = 0
         while step < iterations:
-            batch_xs, batch_ys = self.training_set.next_batch(batch_size)
+            batch_xs, batch_ys = self.training_set.next_batch_cached(batch_size)
             sess.run(self.optimizer, feed_dict={self.x: batch_xs, self.y: batch_ys})
 
             if step % display_step == 0:
@@ -151,7 +151,7 @@ class Network(object):
 
     def write_progress(self, sess, step, batch_size):
         # batch_xs, batch_ys = self.test_set.next_batch(batch_size)
-        batch_xs, batch_ys = self.test_set.next_batch(batch_size)
+        batch_xs, batch_ys = self.test_set.next_batch_cached(batch_size)
         print "calculating stats on {0} samples".format(batch_xs.shape[0])
         summary_str, acc, loss = sess.run([self.merged_summary_op, self.accuracy, self.cost], feed_dict={self.x: batch_xs, self.y: batch_ys})
         self.summary_writer.add_summary(summary_str, step)
@@ -167,7 +167,7 @@ class Network(object):
         step = 0
         true_count = 0
         while step * batch_size < self.test_set.sample_size:
-            batch_xs, batch_ys = self.test_set.next_batch(batch_size)
+            batch_xs, batch_ys = self.test_set.next_batch_cached(batch_size)
             predictions = sess.run(top_k_op, feed_dict={self.x: batch_xs, self.y: batch_ys})
             true_count += np.sum([predictions])
             step += 1
