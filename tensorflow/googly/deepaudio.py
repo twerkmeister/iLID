@@ -54,9 +54,9 @@ import image_input
 FLAGS = tf.app.flags.FLAGS
 
 # Basic model parameters.
-tf.app.flags.DEFINE_integer('batch_size', 32,
+tf.app.flags.DEFINE_integer('batch_size', 10,
                             """Number of images to process in a batch.""")
-tf.app.flags.DEFINE_string('data_dir', '/home/vegeboy/workspace/uni/iLID-Data/output/dubsmash',
+tf.app.flags.DEFINE_string('data_dir', '/home/vegeboy/workspace/uni/iLID-Data/download/2016-01-02_spectrograms/youtube_en_de',
                            """Path to the data directory.""")
 
 # Global constants describing the CIFAR-10 data set.

@@ -38,9 +38,11 @@ import tensorflow as tf
 
 import deepaudio as experiment
 
+
+
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_train_16',
+tf.app.flags.DEFINE_string('train_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_train_youtube_en_de_spectrograms_01',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 20000,

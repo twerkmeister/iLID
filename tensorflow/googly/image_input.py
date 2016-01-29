@@ -34,18 +34,18 @@ from tensorflow.python.platform import gfile
 # Process images of this size. If one alters this number, then the entire model
 # architecture will change and any model would need to be retrained.
 IMAGE_WIDTH = 600
-IMAGE_HEIGHT = 39
+IMAGE_HEIGHT = 253
 IMAGE_DEPTH = 1
 
 #TODO
-TRAIN_DATA_BATCHES = 6
+TRAIN_DATA_BATCHES = 3
 TEST_DATA_BATCHES = 1
 # Global constants for our dataset
 # TODO
 NUM_CLASSES = 2
 # TODO
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 59996
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 11999
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 24000
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 6000
 
 
 def read(filename_queue):
@@ -190,7 +190,7 @@ def distorted_inputs(data_dir, batch_size):
   float_image = tf.image.per_image_whitening(distored_image)
 
   # Ensure that the random shuffling has good mixing properties.
-  min_fraction_of_examples_in_queue = 0.4
+  min_fraction_of_examples_in_queue = 0.2
   min_queue_examples = int(NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
                            min_fraction_of_examples_in_queue)
   print ('Filling queue with %d images before starting to train. '
@@ -246,7 +246,7 @@ def inputs(eval_data, data_dir, batch_size):
   float_image = tf.image.per_image_whitening(reshaped_image)
 
   # Ensure that the random shuffling has good mixing properties.
-  min_fraction_of_examples_in_queue = 0.4
+  min_fraction_of_examples_in_queue = 0.2
   min_queue_examples = int(num_examples_per_epoch *
                            min_fraction_of_examples_in_queue)
 
