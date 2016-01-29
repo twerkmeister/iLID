@@ -11,7 +11,8 @@ def read_wav(f):
   samplerate, signal = wav.read(f)
   #if len(signal.shape) > 1:
   #  signal = signal[:,0]
-  return (filename.clean(f), signal, samplerate)
+  f = filename.truncate_extension(filename.clean(f))
+  return (f, signal, samplerate)
 
 def apply_melfilter(f, signal, samplerate):
   filterbank_energies = audio.melfilterbank.logfilter(samplerate, signal, winlen=0.00833, winstep=0.00833, nfilt=39, lowfreq=0, preemph=1.0)
@@ -39,11 +40,9 @@ def main(args):
   pipeline = (
     sc.parallelize(files, 4)
     .map(lambda f: read_wav(f))
-    .map(lambda (f, signal, samplerate): (filename.truncate_extension(f), signal, samplerate))
     .flatMap(lambda (f, signal, samplerate): sliding_audio(f, signal, samplerate))
     .map(lambda (f, signal, samplerate): downsample(f, signal, samplerate))
-    .map(lambda (f, signal, samplerate): generate_spectrograms(f, signal, samplerate))
-    #.map(lambda (f, signal, samplerate): apply_melfilter(f, signal, samplerate))
+    .map(lambda (f, signal, samplerate): apply_melfilter(f, signal, samplerate))
     .map(lambda (f, image): (f, graphic.colormapping.to_grayscale(image, bytes=True)))
     .map(lambda (f, image): (f, graphic.histeq.histeq(image)))
     .map(lambda (f, image): (f, graphic.histeq.clamp_and_equalize(image)))
@@ -53,7 +52,7 @@ def main(args):
 
   pipeline.collect()
 
-
+#.map(lambda (f, signal, samplerate): generate_spectrograms(f, signal, samplerate))
 if __name__ == '__main__':
 
   args = argparser.parse()

@@ -22,7 +22,7 @@ def read_image(path):
 
 def main(csv_input, output_path, prefix):
     for i, chunk in enumerate(read_csv(csv_input)):
-        file_name = "%s_%03d" % (prefix, i)
+        file_name = "%s_%03d.bin" % (prefix, i)
         print len(chunk)
         with open(os.path.join(output_path, file_name), "wb") as output:
             for image_path, label in chunk:
