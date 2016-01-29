@@ -54,9 +54,9 @@ import image_input
 FLAGS = tf.app.flags.FLAGS
 
 # Basic model parameters.
-tf.app.flags.DEFINE_integer('batch_size', 10,
+tf.app.flags.DEFINE_integer('batch_size', 64,
                             """Number of images to process in a batch.""")
-tf.app.flags.DEFINE_string('data_dir', '/home/vegeboy/workspace/uni/iLID-Data/download/2016-01-02_spectrograms/youtube_en_de',
+tf.app.flags.DEFINE_string('data_dir', '/home/pva1/DeepAudio/iLID-Data/output/2016-01-26_melfilter/youtube_en_de',
                            """Path to the data directory.""")
 
 # Global constants describing the CIFAR-10 data set.
@@ -69,7 +69,7 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = image_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
 # Constants describing the training process.
 MOVING_AVERAGE_DECAY = 0.9999     # The decay to use for the moving average.
-NUM_EPOCHS_PER_DECAY = 5.0      # Epochs after which learning rate decays.
+NUM_EPOCHS_PER_DECAY = 15.0    # Epochs after which learning rate decays.
 LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
 INITIAL_LEARNING_RATE = 0.1       # Initial learning rate.
 
