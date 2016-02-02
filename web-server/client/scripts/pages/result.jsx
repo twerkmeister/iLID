@@ -76,7 +76,6 @@ class Result extends Component {
                 src={this.props.audio.url}
                 className="valign"
                 controls
-                loop
                 />
             </div>
           </div>
