@@ -9,50 +9,26 @@ class ResultStore {
     this.bindActions(VideoActions);
 
     this.audio = null;
+    this.predictions = null;
   }
 
   onReceivePrediction(response) {
     this.audio = response.audio;
+    this.predictions = response.predictions;
 
     RouterActions.transition("result")
 
   }
 
   static getPredictions() {
-    const frames = this.getState().frames;
-    if (frames) {
-      return _.flatten(_.pluck(frames, "predictions"));
-    } else {
-      return null;
-    }
-  }
-
-  static getGroupedPredictions() {
-    const predictions = this.getPredictions();
+    const predictions = this.getState().predictions;
     if (predictions) {
-      const labels = _.unique(_.pluck(predictions, "label"));
-
-      return _.transform(labels, (result, label) => {
-
-        result[label] =
-          _.chain(predictions)
-           .filter(pred => pred.label == label)
-           .pluck("prob")
-           .value()
-      }, {})
+      return predictions;
     } else {
       return null;
     }
   }
 
-  static getFrameNumbers() {
-    const frames = this.getState().frames;
-    if (frames) {
-      return _.pluck(frames, "frameNumber");
-    } else {
-      return null;
-    }
-  }
 
 };
 

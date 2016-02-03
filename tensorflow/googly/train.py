@@ -42,10 +42,10 @@ import deepaudio as experiment
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_train_youtube_en_de_spectrograms_01',
+tf.app.flags.DEFINE_string('train_dir', '/home/pva1/DeepAudio/experiments/melfilter_youtube_en_de_levels',
                            """Directory where to write event logs """
                            """and checkpoint.""")
-tf.app.flags.DEFINE_integer('max_steps', 20000,
+tf.app.flags.DEFINE_integer('max_steps', 30000,
                             """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False,
                             """Whether to log device placement.""")

@@ -17,7 +17,7 @@ class AudioStore {
       {
         id : 1,
         thumbnail : "/dist/images/examples/audio.png",
-        title : "Dubsmash 1",
+        title : "CNN",
         language : "English",
       },
       {
@@ -29,7 +29,7 @@ class AudioStore {
       {
         id : 3,
         thumbnail : "/dist/images/examples/audio.png",
-        title : "Dubsmash 3",
+        title : "Voxforge",
         language : "English",
       }
     ];

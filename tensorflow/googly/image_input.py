@@ -34,18 +34,18 @@ from tensorflow.python.platform import gfile
 # Process images of this size. If one alters this number, then the entire model
 # architecture will change and any model would need to be retrained.
 IMAGE_WIDTH = 600
-IMAGE_HEIGHT = 253
+IMAGE_HEIGHT = 39
 IMAGE_DEPTH = 1
 
 #TODO
-TRAIN_DATA_BATCHES = 3
-TEST_DATA_BATCHES = 1
+TRAIN_DATA_BATCHES = 5
+TEST_DATA_BATCHES = 2
 # Global constants for our dataset
 # TODO
 NUM_CLASSES = 2
 # TODO
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 24000
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 6000
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 48000
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 12000
 
 
 def read(filename_queue):

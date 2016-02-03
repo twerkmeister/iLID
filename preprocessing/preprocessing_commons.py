@@ -5,6 +5,11 @@ import output
 import scipy.io.wavfile as wav
 from util import *
 
+def read_wav_dirty(f):
+  samplerate, signal = wav.read(f)
+  f = filename.truncate_extension(f)
+  return (f, signal, samplerate)
+
 def read_wav(f):
   samplerate, signal = wav.read(f)
   #if len(signal.shape) > 1:
@@ -43,7 +48,7 @@ def wav_to_images(sound_file, output_path):
   }
   window_size = 600 # MFCC sliding window
 
-  f, signal, samplerate = read_wav(sound_file)
+  f, signal, samplerate = read_wav_dirty(sound_file)
   segments = sliding_audio(f, signal, samplerate)
 
   for (filename, signal, samplerate) in segments:

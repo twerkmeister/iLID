@@ -37,17 +37,17 @@ import deepaudio as experiment
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('eval_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_test_youtube_en_de_spectrograms_01',
+tf.app.flags.DEFINE_string('eval_dir', '/home/pva1/DeepAudio/experiments/youtube_en_de_melfilter_levels/eval',
                            """Directory where to write event logs.""")
 tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'test' or 'train_eval'.""")
-tf.app.flags.DEFINE_string('checkpoint_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_train_youtube_en_de_spectrograms_01',
+tf.app.flags.DEFINE_string('checkpoint_dir', '/home/pva1/DeepAudio/experiments/youtube_en_de_melfilter_levels',
                            """Directory where to read model checkpoints.""")
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
                             """How often to run the eval.""")
-tf.app.flags.DEFINE_integer('num_examples', 300,
+tf.app.flags.DEFINE_integer('num_examples', 3000,
                             """Number of examples to run.""")
-tf.app.flags.DEFINE_boolean('run_once', True,
+tf.app.flags.DEFINE_boolean('run_once', False,
                          """Whether to run eval only once.""")
 
 def kernel_summary(sess):
@@ -118,7 +118,7 @@ def eval_once(saver, summary_writer, top_k_op, summary_op):
       summary.value.add(tag='Precision @ 1', simple_value=precision)
       summary_writer.add_summary(summary, global_step)
 
-      kernel_summary(sess)
+      # kernel_summary(sess)
     except Exception as e:  # pylint: disable=broad-except
       coord.request_stop(e)
 
