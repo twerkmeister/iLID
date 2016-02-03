@@ -1,3 +1,9 @@
 [submodule "tools/neg23"]
 	path = tools/neg23
 	url = git@github.com:kylophone/neg23.git
+[submodule "preprocessing/python_speech_features"]
+	path = preprocessing/python_speech_features
+	url = git@github.com:jameslyons/python_speech_features.git
+[submodule "preprocessing/audio/python_speech_features"]
+	path = preprocessing/audio/python_speech_features
+	url = git@github.com:jameslyons/python_speech_features.git
