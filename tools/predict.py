@@ -21,16 +21,15 @@ def predict(sound_file, prototxt, model, output_path):
                          #caffe.TEST
                         )
 
-  input_images = [caffe.io.load_image(image_file) for image_file in image_files["melfilter"]]
-  print input_images
-  #plt.imshow(input_image)
+  input_images = np.array([caffe.io.load_image(image_file, color=False) for image_file in image_files["melfilter"]])
+  input_images = np.swapaxes(input_images, 1, 3)
 
   prediction = net.forward_all(data=input_images)
   print prediction
 
   #prediction = net.predict(input_images, False)  # predict takes any number of images, and formats them for the Caffe net automatically
   #print 'prediction shape:', prediction[0].shape
-  #print 'predicted class:', prediction[0].argmax()
+  print 'predicted class:', prediction[0].argmax()
   return prediction
 
 if __name__ == '__main__':
