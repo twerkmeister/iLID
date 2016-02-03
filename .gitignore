@@ -11,3 +11,4 @@ snapshots/
 
 *.wav
 *.png
+node_modules/
