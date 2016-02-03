@@ -81,8 +81,10 @@ def bad_request(reason):
 def get_prediction(file_path):
 
     LABEL_MAP = {
-        0 : "english",
-        1 : "german"
+        0 : "English",
+        1 : "German",
+        2 : "French",
+        3 : "Spanish"
     }
 
     # TODO remove this for production
