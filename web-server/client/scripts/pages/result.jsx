@@ -27,41 +27,23 @@ class Result extends Component {
 
   getBarChartData() {
 
-    const groupedPredictions = ResultStore.getGroupedPredictions();
-    const columns = _.chain(groupedPredictions)
+    const predictions = ResultStore.getPredictions();
+    const columns = _.chain(predictions)
       .map((value, key) => {
-        const average = _.sum(value) / value.length;
-        return [key, average];
+        return [key, value];
       })
       .sortBy(column => column[1])
       .reverse()
-      .slice(0, 5)
+      .slice(0, 4)
       .value();
 
-    const colors = _.mapValues(groupedPredictions, (value, key) => ColorStore.getColorForLabel(key))
+    const colors = _.mapValues(predictions, (value, key) => ColorStore.getColorForLabel(key))
 
     return {
       columns : columns,
       colors : colors
     }
 
-  }
-
-  getLineChartData() {
-
-    const frameNumbers = ["frameNumber"].concat(ResultStore.getFrameNumbers());
-    const groupedPredictions = ResultStore.getGroupedPredictions();
-
-    let columns = _.map(groupedPredictions, (value, key) => [key].concat(value));
-    columns.push(frameNumbers);
-
-    const colors = _.mapValues(groupedPredictions, (value, key) => ColorStore.getColorForLabel(key))
-
-    return {
-      x : "frameNumber",
-      columns : columns,
-      colors : colors
-    }
   }
 
   render() {

@@ -8,6 +8,10 @@ from flask.json import jsonify
 from werkzeug import secure_filename
 from flask_extensions import *
 
+lib_path = os.path.abspath(os.path.join('../tools'))
+sys.path.append(lib_path)
+from predict import predict
+
 static_assets_path = path.join(path.dirname(__file__), "dist")
 app = Flask(__name__, static_folder= static_assets_path)
 CORS(app)
@@ -76,40 +80,24 @@ def bad_request(reason):
 # -------- Prediction & Features --------
 def get_prediction(file_path):
 
-    return {
-        "audio" : {
-            "url" : "%s" % file_path,
-        }
+    LABEL_MAP = {
+        0 : "english",
+        1 : "german"
     }
 
-    # predictions = np.loadtxt("prob_result.csv")
-    predictions = predict.get_predictions(file_path)
-    labels = predict.get_labels()
-    print predictions.shape
+    # TODO remove this for production
+    # predictions = [[0.3, 0.7]]
+    predictions = predict(file_path, app.config["PROTOTXT"], app.config["MODEL"], app.config["UPLOAD_FOLDER"])
+
+    pred_with_label = {LABEL_MAP[index] : prob for index, prob in enumerate(predictions[0])}
 
     file_path = file_path + "?cachebuster=%s" % time.time()
     result = {
         "audio" : {
             "url" : "%s" % file_path,
         },
+        "predictions" : pred_with_label
     }
-
-
-    for index, row in enumerate(predictions):
-
-        pred_per_label = []
-
-        five_best = np.argpartition(row, -5)[-5:]
-        for i in five_best:
-            pred_per_label.append({"label" : labels[i], "prob" : row[i]})
-
-        new_frame = {
-            "frameNumber" : index,
-            "predictions" : pred_per_label
-        }
-
-        result["frames"].append(new_frame)
-
 
     return result
 
@@ -120,7 +108,9 @@ if __name__ == "__main__":
         DEBUG = True,
         SECRET_KEY = "asassdfs",
         CORS_HEADERS = "Content-Type",
-        UPLOAD_FOLDER = "audio"
+        UPLOAD_FOLDER = "audio",
+        MODEL = os.path.join("model", "berlin_net_iter_10000.caffemodel"),
+        PROTOTXT = os.path.join("model", "net_mel_2lang_bn_deploy.prototxt")
     )
 
     # Make sure all frontend assets are compiled
