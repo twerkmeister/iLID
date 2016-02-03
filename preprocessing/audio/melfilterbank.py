@@ -1,3 +1,8 @@
+import os, sys
+dirname = os.path.dirname(__file__)
+lib_path = os.path.join(dirname, "python_speech_features")
+sys.path.append(lib_path)
+
 import features as speechfeatures
 import numpy as np
 
