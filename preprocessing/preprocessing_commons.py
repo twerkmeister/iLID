@@ -67,12 +67,12 @@ def wav_to_images(sound_file, output_path):
     spectro_image = graphic.histeq.clamp_and_equalize(spectro_image)
     spectro_image = graphic.windowing.cut_or_pad_window(spectro_image, window_size)
 
-    mel_filename = os.path.join(os.path.dirname(filename), "melfilter_%s" % os.path.basename(filename))
-    spectro_filename = os.path.join(os.path.dirname(filename), "spectrogram_%s" % os.path.basename(filename))
+    mel_filename = "melfilter_%s" % os.path.basename(filename)
+    spectro_filename = "spectrogram_%s" % os.path.basename(filename)
     output.image.save(mel_filename, mel_image, output_path)
     output.image.save(spectro_filename, spectro_image, output_path)
 
-    image_files["melfilter"].append(mel_filename + ".png")
-    image_files["spectros"].append(spectro_filename + ".png")
+    image_files["melfilter"].append(os.path.join(output_path, mel_filename + ".png"))
+    image_files["spectros"].append(os.path.join(output_path, spectro_filename + ".png"))
 
   return image_files

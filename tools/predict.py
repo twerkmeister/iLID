@@ -24,7 +24,7 @@ def predict(sound_file, prototxt, model, output_path):
   input_images = np.array([caffe.io.load_image(image_file, color=False) for image_file in image_files["melfilter"]])
   input_images = np.swapaxes(input_images, 1, 3)
 
-  prediction = net.forward_all(data=input_images)
+  prediction = net.forward_all(data=input_images)["prob"]
   print prediction
 
   #prediction = net.predict(input_images, False)  # predict takes any number of images, and formats them for the Caffe net automatically

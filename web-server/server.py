@@ -90,8 +90,11 @@ def get_prediction(file_path):
     # TODO remove this for production
     # predictions = [[0.3, 0.7]]
     predictions = predict(file_path, app.config["PROTOTXT"], app.config["MODEL"], app.config["UPLOAD_FOLDER"])
+    predictions = np.mean(predictions, axis=0).tolist()
 
-    pred_with_label = {LABEL_MAP[index] : prob for index, prob in enumerate(predictions[0])}
+    print predictions
+
+    pred_with_label = {LABEL_MAP[index] : prob for index, prob in enumerate(predictions)}
 
     file_path = file_path + "?cachebuster=%s" % time.time()
     result = {
