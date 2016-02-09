@@ -8,9 +8,10 @@ from flask.json import jsonify
 from werkzeug import secure_filename
 from flask_extensions import *
 
-lib_path = os.path.abspath(os.path.join('../tools'))
+lib_path = os.path.abspath(os.path.join('../evaluation'))
 sys.path.append(lib_path)
 from predict import predict
+from convert_to_mono_wav import convert as convert_to_mono_wav
 
 static_assets_path = path.join(path.dirname(__file__), "dist")
 app = Flask(__name__, static_folder= static_assets_path)
@@ -45,12 +46,13 @@ def uploadAudio():
         return len(filter(lambda ext: ext in filename, ["wav", "mp3", "ogg"])) > 0
 
     file = request.files.getlist("audio")[0]
-    print file
 
     if file and is_allowed(file.filename):
         filename = secure_filename(file.filename)
         file_path = path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(file_path)
+
+        # convert_to_mono_wav(file_path, True)
 
         response = jsonify(get_prediction(file_path))
     else:
@@ -90,8 +92,11 @@ def get_prediction(file_path):
     # TODO remove this for production
     # predictions = [[0.3, 0.7]]
     predictions = predict(file_path, app.config["PROTOTXT"], app.config["MODEL"], app.config["UPLOAD_FOLDER"])
+    predictions = np.mean(predictions, axis=0).tolist()
 
-    pred_with_label = {LABEL_MAP[index] : prob for index, prob in enumerate(predictions[0])}
+    print predictions
+
+    pred_with_label = {LABEL_MAP[index] : prob for index, prob in enumerate(predictions)}
 
     file_path = file_path + "?cachebuster=%s" % time.time()
     result = {

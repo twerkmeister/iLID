@@ -94,7 +94,7 @@ class Home extends Component {
     const errorPanel = this.getErrorPanel();
     const CSSTransitionGroup = ReactAddons.addons.CSSTransitionGroup;
 
-
+    //<AudioCapture/>
     return (
       <div className="home-page">
         {errorPanel}
@@ -104,7 +104,8 @@ class Home extends Component {
             <div className="card-panel">
 
               <div className="card-title">Capture some audio with your Microphone</div>
-              <AudioCapture/>
+              <FileInput ref="fileInput"/>
+              <a className="waves-effect waves-light btn" onClick={this.handleSubmitVideo.bind(this)}>Upload<i className="material-icons right">backup</i></a>
 
             </div>
           </div>
