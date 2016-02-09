@@ -8,7 +8,7 @@ from flask.json import jsonify
 from werkzeug import secure_filename
 from flask_extensions import *
 
-lib_path = os.path.abspath(os.path.join('../tools'))
+lib_path = os.path.abspath(os.path.join('../evaluation'))
 sys.path.append(lib_path)
 from predict import predict
 from convert_to_mono_wav import convert as convert_to_mono_wav
