@@ -11,6 +11,7 @@ from flask_extensions import *
 lib_path = os.path.abspath(os.path.join('../tools'))
 sys.path.append(lib_path)
 from predict import predict
+from convert_to_mono_wav import convert as convert_to_mono_wav
 
 static_assets_path = path.join(path.dirname(__file__), "dist")
 app = Flask(__name__, static_folder= static_assets_path)
@@ -45,12 +46,13 @@ def uploadAudio():
         return len(filter(lambda ext: ext in filename, ["wav", "mp3", "ogg"])) > 0
 
     file = request.files.getlist("audio")[0]
-    print file
 
     if file and is_allowed(file.filename):
         filename = secure_filename(file.filename)
         file_path = path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(file_path)
+
+        # convert_to_mono_wav(file_path, True)
 
         response = jsonify(get_prediction(file_path))
     else:

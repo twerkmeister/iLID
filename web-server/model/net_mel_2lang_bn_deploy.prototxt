@@ -2,8 +2,8 @@ name: "Berlin_net_mel"
 input: "data"
 input_dim: 1
 input_dim: 1
-input_dim: 600
 input_dim: 39
+input_dim: 600
 layer {
   bottom: "data"
   top: "conv1"
