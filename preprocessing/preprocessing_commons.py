@@ -76,3 +76,22 @@ def wav_to_images(sound_file, output_path):
     image_files["spectros"].append(os.path.join(output_path, spectro_filename + ".png"))
 
   return image_files
+
+def wav_to_images_in_memory(sound_file):
+  '''Converts a WAV file input several images and writes them to disk'''
+
+  window_size = 600 # MFCC sliding window
+
+  f, signal, samplerate = read_wav_dirty(sound_file)
+  segments = sliding_audio(f, signal, samplerate)
+
+  for (filename, signal, samplerate) in segments:
+    _, signal, samplerate = downsample(filename, signal, samplerate)
+
+    _, mel_image = apply_melfilter(filename, signal, samplerate)
+    mel_image = graphic.colormapping.to_grayscale(mel_image, bytes=True)
+    mel_image = graphic.histeq.histeq(mel_image)
+    mel_image = graphic.histeq.clamp_and_equalize(mel_image)
+    mel_image = graphic.windowing.cut_or_pad_window(mel_image, window_size)
+
+    yield mel_image

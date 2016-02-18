@@ -8,9 +8,28 @@ from flask.json import jsonify
 from werkzeug import secure_filename
 from flask_extensions import *
 
-lib_path = os.path.abspath(os.path.join('../tools'))
-sys.path.append(lib_path)
-from predict import predict
+tools_path = os.path.abspath(os.path.join('../tools'))
+sys.path.append(tools_path)
+tensorflow_path = os.path.abspath(os.path.join('../tensorflow/googly'))
+sys.path.append(tensorflow_path)
+preprocessing_path = os.path.abspath(os.path.join('../preprocessing'))
+sys.path.append(preprocessing_path)
+
+#from predict import predict
+
+import deepaudio as experiment
+import image_input
+import tensorflow as tf
+from preprocessing_commons import wav_to_images_in_memory
+
+FLAGS = tf.app.flags.FLAGS
+
+tf.app.flags.DEFINE_string('checkpoint_dir', '/home/vegeboy/workspace/uni/iLID-Data/experiment_train_7',
+                           """Directory where to read model checkpoints.""")
+
+probabilities_op = None
+x = None
+sess = None
 
 static_assets_path = path.join(path.dirname(__file__), "dist")
 app = Flask(__name__, static_folder= static_assets_path)
@@ -89,8 +108,10 @@ def get_prediction(file_path):
 
     # TODO remove this for production
     # predictions = [[0.3, 0.7]]
-    predictions = predict(file_path, app.config["PROTOTXT"], app.config["MODEL"], app.config["UPLOAD_FOLDER"])
-    predictions = np.mean(predictions, axis=0).tolist()
+    images = wav_to_images_in_memory(file_path)
+    with tf.Session() as sess:
+        probabilities = sess.run([probabilities_op], feed_dict={x: images})
+        predictions = np.mean(predictions, axis=0).tolist()
 
     print predictions
 
@@ -107,6 +128,40 @@ def get_prediction(file_path):
     return result
 
 
+def initialize_model():
+    global probabilities
+    global x
+    """Eval for a number of steps."""
+    with tf.Graph().as_default():
+    # Get images and labels for 10.
+        x = tf.placeholder(tf.float32, [None, 39, 600, 1])
+
+        # Build a Graph that computes the logits predictions from the
+        # inference model.
+        logits = experiment.inference(x)
+
+        # Calculate predictions.
+        probabilities = tf.nn.softmax(logits)
+
+        # Restore the moving average version of the learned variables for eval.
+        variable_averages = tf.train.ExponentialMovingAverage(
+            experiment.MOVING_AVERAGE_DECAY)
+        variables_to_restore = {}
+        for v in tf.all_variables():
+          if v in tf.trainable_variables():
+            restore_name = variable_averages.average_name(v)
+          else:
+            restore_name = v.op.name
+          variables_to_restore[restore_name] = v
+
+        saver = tf.train.Saver(variables_to_restore)
+
+        ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
+        with tf.Session() as sess:
+            if ckpt and ckpt.model_checkpoint_path:
+                # Restores from checkpoint
+                saver.restore(sess, ckpt.model_checkpoint_path)
+
 if __name__ == "__main__":
     # Start the server
     app.config.update(
@@ -117,9 +172,9 @@ if __name__ == "__main__":
         MODEL = os.path.join("model", "berlin_net_iter_10000.caffemodel"),
         PROTOTXT = os.path.join("model", "net_mel_2lang_bn_deploy.prototxt")
     )
-
+    initialize_model()
     # Make sure all frontend assets are compiled
     # subprocess.Popen("webpack")
 
     # Start the Flask app
-    app.run(port=9000)
+    app.run(port=9009)

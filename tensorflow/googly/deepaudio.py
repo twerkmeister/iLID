@@ -54,7 +54,7 @@ import image_input
 FLAGS = tf.app.flags.FLAGS
 
 # Basic model parameters.
-tf.app.flags.DEFINE_integer('batch_size', 64,
+tf.app.flags.DEFINE_integer('batch_size', 1,
                             """Number of images to process in a batch.""")
 tf.app.flags.DEFINE_string('data_dir', '/home/pva1/DeepAudio/iLID-Data/output/2016-01-26_melfilter/youtube_en_de',
                            """Path to the data directory.""")
@@ -206,7 +206,7 @@ def inference(images):
   Returns:
     Logits.
   """
-
+  print(images.get_shape())
   # conv1
   with tf.variable_scope('conv1') as scope:
     kernel = _variable_with_weight_decay('weights', shape=[6, 6, 1, 12],
