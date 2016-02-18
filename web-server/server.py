@@ -105,6 +105,8 @@ def bad_request(reason):
 
 # -------- Prediction & Features --------
 def get_prediction(file_path):
+    global sess
+    global x
 
     LABEL_MAP = {
         0 : "English",
@@ -116,14 +118,19 @@ def get_prediction(file_path):
     # TODO remove this for production
     # predictions = [[0.3, 0.7]]
     images = wav_to_images_in_memory(file_path)
-    with tf.Session() as sess:
-        probabilities = sess.run([probabilities_op], feed_dict={x: images})
-        predictions = np.mean(predictions, axis=0).tolist()
+    images = [np.reshape(image, [1, 39, 600, 1]) for image in images]
+
+    #print(images)
+    probabilities = [sess.run([probabilities_op], feed_dict={x: image}) for image in images]
+    probabilities = np.array(probabilities)
+    #print(probabilities)
+    predictions = np.reshape(np.mean(probabilities, axis=0), [2]).tolist()
 
     print predictions
 
     pred_with_label = {LABEL_MAP[index] : prob for index, prob in enumerate(predictions)}
 
+    print pred_with_label
     file_path = file_path + "?cachebuster=%s" % time.time()
     result = {
         "audio" : {
@@ -136,8 +143,9 @@ def get_prediction(file_path):
 
 
 def initialize_model():
-    global probabilities
+    global probabilities_op
     global x
+    global sess
     """Eval for a number of steps."""
     with tf.Graph().as_default():
     # Get images and labels for 10.
@@ -148,7 +156,7 @@ def initialize_model():
         logits = experiment.inference(x)
 
         # Calculate predictions.
-        probabilities = tf.nn.softmax(logits)
+        probabilities_op = tf.nn.softmax(logits)
 
         # Restore the moving average version of the learned variables for eval.
         variable_averages = tf.train.ExponentialMovingAverage(
@@ -164,10 +172,10 @@ def initialize_model():
         saver = tf.train.Saver(variables_to_restore)
 
         ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
-        with tf.Session() as sess:
-            if ckpt and ckpt.model_checkpoint_path:
-                # Restores from checkpoint
-                saver.restore(sess, ckpt.model_checkpoint_path)
+        sess = tf.Session()
+        if ckpt and ckpt.model_checkpoint_path:
+            # Restores from checkpoint
+            saver.restore(sess, ckpt.model_checkpoint_path)
 
 if __name__ == "__main__":
     # Start the server
