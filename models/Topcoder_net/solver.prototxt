@@ -1,7 +1,7 @@
-net: "/home/mpss2015m_1/DeepAudio/iLID/models/Berlin_net/net_mel_2lang_bn.prototxt"
+net: "/home/mpss2015m_1/DeepAudio/iLID/models/Topcoder_net/net.prototxt"
 test_iter: 2500
 test_interval: 1000
-base_lr: 0.1
+base_lr: 0.001
 lr_policy: "step"
 stepsize: 7000
 gamma: 0.1

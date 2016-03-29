@@ -1,11 +1,9 @@
 name: "VGG_CNN_M_2048"
 input: "data"
-input_shape {
-  dim: 1
-  dim: 3
-  dim: 224
-  dim: 224
-}
+input_dim: 1
+input_dim: 3
+input_dim: 224
+input_dim: 224
 layer {
   bottom: "data"
   top: "conv1"
@@ -276,10 +274,4 @@ layer {
   bottom: "fc8_new"
   top: "prob"
 }
-layer {
-  name: "loss"
-  type: "SoftmaxWithLoss"
-  bottom: "fc8_new"
-  bottom: "label"
-  top: "loss"
-}
+
