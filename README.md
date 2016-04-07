@@ -8,6 +8,8 @@ We used two deep learning approaches using the Tensorflow and Caffe frameworks f
 
 ## Repo Structure
 
+- **/data**
+  - Scripts to download training data from Voxforge and Youtube. For usage details see below.  
 - **/Evaluation**
   - Prediction scripts for single audio files or list of files using Caffe
 - **/Preprocessing**
@@ -37,10 +39,30 @@ We used two deep learning approaches using the Tensorflow and Caffe frameworks f
 - Spark
 - Python 2.7
 - OpenCV 2.4+
+- youtube_dl
 
 ```
 // Install additional Python requirements
 pip install -r requirements.txt
+pip install youtube_dl
+```
+
+## Datasets
+Downloads training data / audio samples from various sources.
+
+#### Voxforge
+- Downloads the audio samples from www.voxforge.org for some languages
+```bash
+/data/voxforge/download-data.sh
+/data/voxforge/extract_tgz.sh {path_to_german.tgz} german
+```
+
+#### Youtube
+- Downloads various news channels from Youtube.
+- Configure channels/sources in `youtube/sources.yml`
+
+```python
+python /data/youtube/download.py
 ```
 
 ## Models
