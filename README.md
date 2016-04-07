@@ -51,6 +51,7 @@ We trained models for 2/4 languages (English, German, French, Spanish).
 The top scoring networks were trained with 15.000 images per languages, a batch size of 64, and a learning rate of 0.001 that was decayed to 0.0001 after 7.000 iterations.
 
 [Shallow Network EN/DE](https://github.com/twerkmeister/iLID/blob/master/models/Berlin_net/net_mel_2lang_bn.prototxt)
+
 [Shallow Network EN/DE/FR/ES](https://github.com/twerkmeister/iLID/blob/master/models/Berlin_net/net_mel_4lang_bn.prototxt)
 
 
