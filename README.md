@@ -65,7 +65,7 @@ The top scoring networks were trained with 15.000 images per languages, a batch 
 
 ```
 // Tensorflow:
-/tensorflow/train.py
+python /tensorflow/train.py
 ```
 
 #### Labels
