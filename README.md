@@ -14,7 +14,11 @@ We used two deep learning approaches using the Tensorflow and Caffe frameworks f
   - Includes all scripts to convert a WAV audio file into spectrogram and mel-filter spectrogram images using a Spark Pipeline.
   - All scripts to create/extract the audio features
   - To convert a directory of WAV audio files using the Spark pipeline run: `./run.sh --inputPath {input_path} --outputPath {output_path} | tee sparkline.log -`
-- **/model**
+- **/models**
+  - All our Caffe models: Berlin_net, Topcoder, VGG_M
+  - Berlin_net: 3Conv + Batch Normalisation, 2 FullyConnected Layer (Shallow Architecture)
+  - Topcoder_net: (Deep Architecture) inspired by [Topcoder's spoken language identification challenge](https://yerevann.github.io/2015/10/11/spoken-language-identification-with-deep-convolutional-networks/)
+  - Finetuning of [VGG_M](http://www.robots.ox.ac.uk/~vgg/research/deep_eval/)
 - **/tensorflow**
   - All the code for setting up and training various models with Tensorflow.
   - Includes training and prediction script. See `train.py` and `predict.py`.
@@ -39,17 +43,38 @@ We used two deep learning approaches using the Tensorflow and Caffe frameworks f
 pip install -r requirements.txt
 ```
 
-## Model Training
+## Models
 
-For Caffe:
+We trained models for 2/4 languages (English, German, French, Spanish). 
+
+#### Best Performing Models
+The top scoring networks were trained with 15.000 images per languages, a batch size of 64, and a learning rate of 0.001 that was decayed to 0.0001 after 7.000 iterations.
+
+[Shallow Network EN/DE](https://github.com/twerkmeister/iLID/blob/master/models/Berlin_net/net_mel_2lang_bn.prototxt)
+[Shallow Network EN/DE/FR/ES](https://github.com/twerkmeister/iLID/blob/master/models/Berlin_net/net_mel_4lang_bn.prototxt)
+
+
+#### Training
+
 ```
+// Caffe:
 /models/{model_name}/training.sh
 ```
 
-For Tensorflow:
+
 ```
+// Tensorflow:
 /tensorflow/train.py
 ```
+
+#### Labels
+```
+0 English, 
+1 German, 
+2 French, 
+3 Spanish
+```
+
 
 ## Training Data
 For training we used both the public [Voxforge](http://www.voxforge.org/) dataset and downloaded news reel videos from Youtube. Check out the training data repo: https://github.com/twerkmeister/iLID-data
