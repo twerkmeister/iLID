@@ -33,12 +33,10 @@ def clamp_and_equalize(image):
     LUT[i] = base
     base += factor
 
+
+   # Careful this casts the image from float64 to int8.
+   # Use late in pipeline
+   image_int = image.astype(np.int8)
+
    # apply the Lookup Table
-   height, width = image.shape
-
-   for i in np.arange(height):
-    for j in np.arange(width):
-      image[i][j] = LUT[image[i][j]]
-
-   # return np.take(LUT, image)
-   return image
+   return np.take(LUT, image_int)

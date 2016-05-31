@@ -45,7 +45,7 @@ def pad_window(window, windowsize):
     missing_window_width = windowsize - _width(window)
     padding = None
     if has_channels:
-      padding = np.zeros((_height(window), missing_window_width, image_channels))
+      padding = np.zeros((_height(window), missing_window_width, window_channels))
     else:
       padding = np.zeros((_height(window), missing_window_width))
     window = np.append(window, padding, axis=1)
