@@ -100,6 +100,6 @@ python /tensorflow/train.py
 
 
 ## Training Data
-For training we used both the public [Voxforge](http://www.voxforge.org/) dataset and downloaded news reel videos from Youtube. Check out the training data repo: https://github.com/twerkmeister/iLID-data
+For training we used both the public [Voxforge](http://www.voxforge.org/) dataset and downloaded news reel videos from Youtube. Check out the */data* directory for download scripts.
 
 
